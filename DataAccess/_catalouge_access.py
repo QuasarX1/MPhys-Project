@@ -2,8 +2,8 @@ import numpy as np
 import h5py as h5
 import os
 
-from ._unit_conversions import UnitSystem
-from ._simulation_combinations import Simulations, SimulationModels
+from DataAccess._unit_conversions import UnitSystem
+from DataAccess._simulation_combinations import Simulations, SimulationModels
 
 def load_catalouge_field(field_name:  str,
                          table:       str,
@@ -84,16 +84,5 @@ def load_catalouge_field(field_name:  str,
         if unit_system == UnitSystem.cgs:
             data_arr = np.array(data_arr, dtype = np.float64)
         data_arr = UnitSystem.convert_data(data_arr, UnitSystem.h_less_comoving_GADGET, unit_system, h, h_scale_exponent, a, a_scale_exponent, cgs_conversion_factor)
-
-        #if unit_system == UnitSystem.physical:
-        #    data_arr *= np.power(h, h_scale_exponent) * np.power(a, a_scale_exponent)
-        #
-        #if unit_system == UnitSystem.cgs:
-        #
-        #    # cgs numbers can be huge and overflow np.float32
-        #    # Recast the data to float64 to be safe
-        #    data_arr = np.array(data_arr, dtype = np.float64)
-        #
-        #    data_arr *= cgs_conversion_factor
 
     return data_arr

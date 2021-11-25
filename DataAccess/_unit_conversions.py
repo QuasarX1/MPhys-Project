@@ -28,6 +28,10 @@ class UnitSystem(Enum):
             (np.ndarray or float) -> The converted value(s)
         """
 
+        # Prevent modification to the origanal data
+        if isinstance(data, np.ndarray):
+            data = data.copy()
+
         if not isinstance(from_unit, UnitSystem):
             raise TypeError("Paramiter \"from_unit\" was not of type \"UnitSystem\".")
         if not isinstance(to_unit, UnitSystem):
