@@ -1,17 +1,7 @@
-import os
 import numpy as np
 from matplotlib import pyplot as plt
 
-import h5py as h5
-import pyread_eagle
-
 from DataAccess import ParticleReadConversion_EagleSnapshot, Simulations, SimulationModels, ParticleType, UnitSystem
-
-def combine_limits(lower, upper):
-    bound_length = len(lower)
-    if bound_length != len(upper):
-        raise ValueError("Arrays of bounds were not of the same length.")
-    return np.append(np.array(lower).reshape((bound_length, 1)), np.array(upper).reshape((bound_length, 1)), axis = 1).reshape(2 * bound_length)
 
 sim = Simulations.Organic
 model = SimulationModels.RECAL
@@ -21,71 +11,106 @@ relitive_data_root = ".\\gm_for_mphys"
 
 snapshot = ParticleReadConversion_EagleSnapshot(tag, sim, model, relitive_data_root)
 
+physical_box_size = snapshot.convert_distance_values(snapshot.boxsize, UnitSystem.h_less_comoving_GADGET, UnitSystem.physical)
 print("Box size in GADGET units = {}".format(snapshot.boxsize))
-print("Box size in physical units = {}".format(snapshot.convert_distance_values(snapshot.boxsize, UnitSystem.h_less_comoving_GADGET, UnitSystem.physical)))
+print("Box size in physical units = {}".format(physical_box_size))
 print()
 
-galaxy_centre = np.array([28.326, 2.614, 21.519])
-galaxy_bounds_lower_relitive = np.array([-0.025, -0.025, -0.025])
-galaxy_bounds_upper_relitive = np.array([0.025, 0.025, 0.025])
+organic_galaxy_centre = np.array([28.326, 2.614, 21.519])
+organic_galaxy_centre_physical_units = snapshot.convert_distance_values(organic_galaxy_centre, UnitSystem.h_less_comoving_GADGET, UnitSystem.physical)
 
-galaxy_centre_physical_units = snapshot.convert_distance_values(galaxy_centre, UnitSystem.h_less_comoving_GADGET, UnitSystem.physical)
+galaxy_centres = [organic_galaxy_centre_physical_units + np.array([0.42, 0.63, 0.34]),
+                  organic_galaxy_centre_physical_units,
+                  organic_galaxy_centre_physical_units]
+
+galaxy_picture_edge_offsets = [0.15, 0.025, 0.025]
+
+
+
+"""
+snapshot = ParticleReadConversion_EagleSnapshot(tag, Simulations.Early, model, relitive_data_root)
+
+offset = galaxy_picture_edge_offsets[0]
+galaxy_centre_physical_units = galaxy_centres[0]
+
+galaxy_bounds_lower_relitive = np.full((3, ), -offset)
+galaxy_bounds_upper_relitive = np.full((3, ), offset)
+
 lower_physical_limits = galaxy_bounds_lower_relitive + galaxy_centre_physical_units
 upper_physical_limits = galaxy_bounds_upper_relitive + galaxy_centre_physical_units
 
-lower_gadget_limits = snapshot.convert_distance_values(lower_physical_limits, UnitSystem.physical, UnitSystem.h_less_comoving_GADGET)
-upper_gadget_limits = snapshot.convert_distance_values(upper_physical_limits, UnitSystem.physical, UnitSystem.h_less_comoving_GADGET)
+#particle_locations = snapshot.particle_read(ParticleType.star, "Coordinates", unit_system = UnitSystem.physical)
+particle_locations = snapshot.particle_read(ParticleType.star, "Coordinates", lower_physical_limits, upper_physical_limits, UnitSystem.physical, UnitSystem.physical)
 
+particle_locations_centre_adjusted = particle_locations - galaxy_centre_physical_units
 
-#limits[0.0, snapshot.boxsize, 0.0, snapshot.boxsize, 0.0, snapshot.boxsize]
-limits = combine_limits(lower_gadget_limits, upper_gadget_limits)
+particle_locations_box_adjusted = ((particle_locations_centre_adjusted + (physical_box_size / 2)) % physical_box_size) - (physical_box_size / 2)
 
-print("Region bounds in GADGET units = {}".format(limits))
-print("Region bounds in relitive physical units = {}".format(combine_limits(galaxy_bounds_lower_relitive, galaxy_bounds_upper_relitive)))
-print()
+fig = plt.figure(figsize = (12, 12))
 
-snapshot.select_region(*limits)
-
-
-
-
-
-
-#gas_particle_locations = snapshot.particle_read(ParticleType.gas, "Coordinates", UnitSystem.physical)
-gas_particle_locations = snapshot.convert_distance_values(snapshot.particle_read(ParticleType.gas, "Coordinates"), UnitSystem.h_less_comoving_GADGET, UnitSystem.physical)
-#print(gas_particle_locations)
-#print()
-
-gas_particle_locations_centre_adjusted = gas_particle_locations - galaxy_centre_physical_units
-#print(gas_particle_locations_centre_adjusted)
-#print()
-
-print("X Data Extremes:")
-print(min(gas_particle_locations_centre_adjusted[:, 0]))
-print(max(gas_particle_locations_centre_adjusted[:, 0]))
-print("Y Data Extremes:")
-print(min(gas_particle_locations_centre_adjusted[:, 1]))
-print(max(gas_particle_locations_centre_adjusted[:, 1]))
-print("Z Data Extremes:")
-print(min(gas_particle_locations_centre_adjusted[:, 2]))
-print(max(gas_particle_locations_centre_adjusted[:, 2]))
-print()
-
-#plt.scatter(gas_particle_locations_centre_adjusted[:, 0], gas_particle_locations_centre_adjusted[:, 1])
-#plt.show()
 ax = plt.subplot(2, 2, 1)
-ax.scatter(gas_particle_locations_centre_adjusted[:, 0], gas_particle_locations_centre_adjusted[:, 1], s = 0.01)
+ax.set_xlabel("X (pMpc)")
+ax.set_ylabel("Y (pMpc)")
+ax.scatter(particle_locations_box_adjusted[:, 0], particle_locations_box_adjusted[:, 1], s = 0.01)
 
-#plt.scatter(gas_particle_locations_centre_adjusted[:, 2], gas_particle_locations_centre_adjusted[:, 1])
-#plt.show()
 ax = plt.subplot(2, 2, 2)
-ax.scatter(gas_particle_locations_centre_adjusted[:, 2], gas_particle_locations_centre_adjusted[:, 1], s = 0.01)
+ax.set_xlabel("Z (pMpc)")
+ax.set_ylabel("Y (pMpc)")
+ax.scatter(particle_locations_box_adjusted[:, 2], particle_locations_box_adjusted[:, 1], s = 0.01)
 
-#plt.scatter(gas_particle_locations_centre_adjusted[:, 0], gas_particle_locations_centre_adjusted[:, 2])
-#plt.show()
 ax = plt.subplot(2, 2, 3)
-ax.scatter(gas_particle_locations_centre_adjusted[:, 0], gas_particle_locations_centre_adjusted[:, 2], s = 0.01)
+ax.set_xlabel("X (pMpc)")
+ax.set_ylabel("Z (pMpc)")
+ax.scatter(particle_locations_box_adjusted[:, 0], particle_locations_box_adjusted[:, 2], s = 0.01)
 
 plt.show()
+"""
 
+
+
+simulations = (Simulations.Early, Simulations.Organic, Simulations.Late)
+for i in range(len(simulations)):
+    snapshot = ParticleReadConversion_EagleSnapshot(tag, simulations[i], model, relitive_data_root)
+
+    offset = galaxy_picture_edge_offsets[i]
+    galaxy_centre_physical_units = galaxy_centres[i]
+
+    galaxy_bounds_lower_relitive = np.full((3, ), -offset)
+    galaxy_bounds_upper_relitive = np.full((3, ), offset)
+    
+    lower_physical_limits = galaxy_bounds_lower_relitive + galaxy_centre_physical_units
+    upper_physical_limits = galaxy_bounds_upper_relitive + galaxy_centre_physical_units
+
+    particle_types = (ParticleType.gas, ParticleType.star, ParticleType.dark_matter)
+    particle_type_graph_names = ("Gas", "Star" ,"Dark Matter")
+    for j in range(len(particle_types)):
+        particle_locations = snapshot.particle_read(particle_types[j], "Coordinates", lower_physical_limits, upper_physical_limits, UnitSystem.physical, UnitSystem.physical)
+
+        particle_locations_centre_adjusted = particle_locations - galaxy_centre_physical_units
+
+        particle_locations_box_adjusted = ((particle_locations_centre_adjusted + (physical_box_size / 2)) % physical_box_size) - (physical_box_size / 2)
+
+        fig = plt.figure(figsize = (12, 12))
+
+        ax = plt.subplot(2, 2, 1)
+        ax.set_xlabel("X (pMpc)")
+        ax.set_ylabel("Y (pMpc)")
+        ax.scatter(particle_locations_box_adjusted[:, 0], particle_locations_box_adjusted[:, 1], s = 0.01)
+
+        ax = plt.subplot(2, 2, 2)
+        ax.set_xlabel("Z (pMpc)")
+        ax.set_ylabel("Y (pMpc)")
+        ax.scatter(particle_locations_box_adjusted[:, 2], particle_locations_box_adjusted[:, 1], s = 0.01)
+
+        ax = plt.subplot(2, 2, 3)
+        ax.set_xlabel("X (pMpc)")
+        ax.set_ylabel("Z (pMpc)")
+        ax.scatter(particle_locations_box_adjusted[:, 0], particle_locations_box_adjusted[:, 2], s = 0.01)
+    
+        fig.suptitle("{} Particle Projection of the Assembled Galaxy in the {} Regime".format(particle_type_graph_names[j], Simulations.to_string(simulations[i]).title()))
+        plt.show()
+"""
+"""
+
+# x = 0.42 (-0.15, 0.15), y = 0.63 (-0.15, 0.15), z = 0.34 (-0.15, 0.15)
 # x = (-0.025, 0.025), y = (-0.025, 0.025), z = (-0.025, 0.025)

@@ -7,6 +7,12 @@ from DataAccess._unit_conversions import UnitSystem
 from DataAccess._simulation_combinations import Simulations, SimulationModels
 from DataAccess._particle_type import ParticleType
 
+def combine_limits(lower, upper):
+    bound_length = len(lower)
+    if bound_length != len(upper):
+        raise ValueError("Arrays of bounds were not of the same length.")
+    return np.append(np.array(lower).reshape((bound_length, 1)), np.array(upper).reshape((bound_length, 1)), axis = 1).reshape(2 * bound_length)
+
 class ParticleReadConversion_EagleSnapshot(pyread_eagle.EagleSnapshot):
     """
     Custom Eagle Smapshot class that implements a method
@@ -68,22 +74,48 @@ class ParticleReadConversion_EagleSnapshot(pyread_eagle.EagleSnapshot):
         return self.header['ExpansionFactor']
 
     def particle_read(self,
-                      particle_type: ParticleType,
-                      field_name:    str,
-                      unit_system:   UnitSystem = UnitSystem.h_less_comoving_GADGET) -> np.ndarray:
+                      particle_type:         ParticleType,
+                      field_name:            str,
+                      lower_limits:          np.ndarray   = None,
+                      upper_limits:          np.ndarray   = None,
+                      unit_system:           UnitSystem   = UnitSystem.h_less_comoving_GADGET,
+                      limits_unit_system:    UnitSystem   = UnitSystem.h_less_comoving_GADGET,
+                      use_vanilla_selection: bool         = False) -> np.ndarray:
         """
         Loads particle data in the set region for a specified snapshot.
 
         See https://j-davies-ari.github.io/eagle-guide/working_with_particles for origanal code and tutorial.
 
         Paramiters:
-            ParticleType particle_type -> The type of particle for which to load data
-                     str field_name    -> The name of the data field
-              UnitSystem unit_system   -> The unit system to convert the results into (default: UnitSystem.h_less_comoving_GADGET)
+            ParticleType particle_type         -> The type of particle for which to load data
+                     str field_name            -> The name of the data field
+              np.ndarray lower_limits          -> Lower boundries of the region to select particles within (an array with 3 values - [x, y, z]) (default: lower limits of the box)
+              np.ndarray upper_limits          -> Upper boundries of the region to select particles within (an array with 3 values - [x, y, z]) (default: upper limits of the box)
+              UnitSystem unit_system           -> The unit system to convert the results into (default: UnitSystem.h_less_comoving_GADGET)
+              UnitSystem limits_unit_system    -> The unit system that represents the values of the specified limits (default: UnitSystem.h_less_comoving_GADGET)
+                    bool use_vanilla_selection -> Ignore specified limits and fall back on pyread_eagle.EagleSnapshot selection (default: False)
 
         Returns:
             np.ndarray -> Numpy array containing the data from the specified field
         """
+
+        if not use_vanilla_selection:
+            if lower_limits is None:
+                # If no limits are specified, use the box boundry
+                lower_limits = np.full((3, ), 0.0)
+            elif limits_unit_system != UnitSystem.h_less_comoving_GADGET:
+                # If limits are specified, ensure they are in GADGET units
+                lower_limits = self.convert_distance_values(lower_limits, limits_unit_system, UnitSystem.h_less_comoving_GADGET)
+
+            if upper_limits is None:
+                # If no limits are specified, use the box boundry
+                upper_limits = np.full((3, ), self.boxsize)
+            elif limits_unit_system != UnitSystem.h_less_comoving_GADGET:
+                # If limits are specified, ensure they are in GADGET units
+                upper_limits = self.convert_distance_values(upper_limits, limits_unit_system, UnitSystem.h_less_comoving_GADGET)
+
+            limits = combine_limits(lower_limits, upper_limits)
+            self.select_region(*limits)
 
         h_scale_exponent = self.h_scale_exponent_values[particle_type][field_name]
         a_scale_exponent = self.a_scale_exponent_values[particle_type][field_name]
@@ -94,6 +126,9 @@ class ParticleReadConversion_EagleSnapshot(pyread_eagle.EagleSnapshot):
         # Convert to numpy array with the correct data type
         dt = data_arr.dtype
         data_arr = np.array(data_arr, dtype = dt)
+        if not use_vanilla_selection:
+            # Remofe excess particles that were loaded
+            data_arr = data_arr[(data_arr[:, 0] > lower_limits[0]) & (data_arr[:, 0] < upper_limits[0]) & (data_arr[:, 1] > lower_limits[1]) & (data_arr[:, 1] < upper_limits[1]) & (data_arr[:, 2] > lower_limits[2]) & (data_arr[:, 2] < upper_limits[2])]
 
 
         # Convert values - no corrections needed for integer type data
