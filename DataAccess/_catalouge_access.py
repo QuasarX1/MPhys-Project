@@ -50,32 +50,52 @@ def load_catalouge_field(field_name:  str,
     cgs_conversion_factor = None
     h = None
     a = None
+    read_constants = True
     for file_number in file_numbers:
         with h5.File(subfind_file_template.format(file_number), "r") as datafile:
-            data = datafile[f"/{table}/{field_name}"]
+            try:
+                data = datafile[f"/{table}/{field_name}"]
 
-            if file_number == 0:
-                h_scale_exponent = data.attrs["h-scale-exponent"]
-                a_scale_exponent = data.attrs["aexp-scale-exponent"]
-                cgs_conversion_factor = data.attrs["CGSConversionFactor"]
-                h = datafile["Header"].attrs["HubbleParam"]
-                a = datafile["Header"].attrs["ExpansionFactor"]
+                #if file_number == 0:
+                if read_constants:
+                    try:
+                        h_scale_exponent = data.attrs["h-scale-exponent"]
+                        a_scale_exponent = data.attrs["aexp-scale-exponent"]
+                        cgs_conversion_factor = data.attrs["CGSConversionFactor"]
+                        h = datafile["Header"].attrs["HubbleParam"]
+                        a = datafile["Header"].attrs["ExpansionFactor"]
+                        read_constants = False
 
-                if verbose:
-                    print("Loading", field_name)
-                    print("h exponent =", h_scale_exponent)
-                    print("a exponent =", a_scale_exponent)
-                    print("cgs conversion factor =", cgs_conversion_factor)
-                    print("h =", h)
-                    print("a =", a)
+                        if verbose:
+                            print("Loading", field_name)
+                            print("h exponent =", h_scale_exponent)
+                            print("a exponent =", a_scale_exponent)
+                            print("cgs conversion factor =", cgs_conversion_factor)
+                            print("h =", h)
+                            print("a =", a)
+
+                    except:
+                        read_constants = False
+
+                        if verbose:
+                            print("Error reading data scaling constants! Will attempt again with next file.")
                     
-                dt = data.dtype
-                data_arr = np.array(data, dtype = dt)
+                    dt = data.dtype
+                    data_arr = np.array(data, dtype = dt)
             
-            else:
-                data_arr = np.append(data_arr,np.array(data, dtype = dt), axis = 0)
+                else:
+                    data_arr = np.append(data_arr,np.array(data, dtype = dt), axis = 0)
+
+            except KeyError:
+                if verbose:
+                    print(f"No data avalible fron file number {file_number}.")
 
     if verbose: print("Run out of files after loading", file_number)
+
+    if read_constants:# No files contained the nessessary field or the constants failed to load
+        if verbose:
+            print("Unable to retrive scaling constants - does this tag contain the specified field?")
+        raise LookupError("Scaling constants were not loaded from tag files. Possible that the specified field was not present.")
 
     # Convert values - no corrections needed for integer type data
     if not np.issubdtype(dt, np.integer):

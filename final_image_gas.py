@@ -19,9 +19,9 @@ print()
 organic_galaxy_centre = np.array([28.326, 2.614, 21.519])
 organic_galaxy_centre_physical_units = snapshot.convert_distance_values(organic_galaxy_centre, UnitSystem.h_less_comoving_GADGET, UnitSystem.physical)
 
-galaxy_centres = [organic_galaxy_centre_physical_units + np.array([0.42, 0.63, 0.34]),
+galaxy_centres = [organic_galaxy_centre_physical_units + np.array([0.42436218, 0.63016963, 0.34677315]),
                   organic_galaxy_centre_physical_units,
-                  organic_galaxy_centre_physical_units]
+                  organic_galaxy_centre_physical_units + np.array([-0.839489, -0.5783951, -0.05172157])]
 
 galaxy_picture_edge_offsets = [0.15, 0.025, 0.025]
 
