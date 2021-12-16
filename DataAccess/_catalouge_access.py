@@ -3,6 +3,7 @@ import h5py as h5
 import os
 
 from DataAccess._unit_conversions import UnitSystem
+from DataAccess._particle_type import ParticleType
 from DataAccess._simulation_combinations import Simulations, SimulationModels
 
 def load_catalouge_field(field_name:  str,
@@ -106,3 +107,46 @@ def load_catalouge_field(field_name:  str,
         data_arr = UnitSystem.convert_data(data_arr, UnitSystem.h_less_comoving_GADGET, unit_system, h, h_scale_exponent, a, a_scale_exponent, cgs_conversion_factor)
 
     return data_arr
+
+def particles_by_group(tag:           str,
+                       particle_type: ParticleType,
+                       simulation:    Simulations,
+                       model:         SimulationModels,
+                       data_root:     str,
+                       verbose:       bool             = False):
+    """
+    Load the particle IDs, subgroup numbers and group numbers for particles in a tag.
+
+    Paramiters:
+                     str tag           -> Snapshot identifier
+            ParticleType particle_type -> The type of particle to load data for, specified with an enum
+             Simulations simulation    -> The target simulation specified with an enum
+        SimulationModels model         -> The target simulation model specified with an enum
+                     str data_root     -> The filepath to the root of the GM simulations directory
+                    bool verbose       -> Print out progress infomation (default: False)
+
+    Returns:
+        np.ndarray -> Numpy array containing the particle ID, the associated group number, the associated subgroup number and the binding energy
+    """
+
+    subfind_particles_folder = os.path.join(data_root, SimulationModels.to_string(model), Simulations.to_string(simulation), f"particledata_{tag}")
+    subfind_file_template = os.path.join(group_folder, f"eagle_subfind_particles_{tag}.{{}}.hdf5")
+
+    file_numbers = [int(file_name[37:-5]) for file_name in os.listdir(group_folder) if file_name[:23] == "eagle_subfind_particles"]
+    file_numbers.sort()
+    results = [[], [], [], []]
+    for file_number in file_numbers:
+        with h5.File(subfind_file_template.format(file_number), "r") as datafile:
+            particle_type_number = particle_type.value
+            try:
+                results[0].append(datafile[f"/PartType{particle_type_number}/ParticleIDs"])# Particles
+                results[1].append(datafile[f"/PartType{particle_type_number}/GroupNumber"])# Associated Groups
+                results[2].append(datafile[f"/PartType{particle_type_number}/SubGroupNumber"])# Associated Subgroups
+                results[3].append(datafile[f"/PartType{particle_type_number}/ParticleBindingEnergy"])# Associated Binding Energy
+            except KeyError:
+                if verbose:
+                    print(f"No data avalible fron file number {file_number}.")
+
+            if verbose: print("Run out of files after loading", file_number)
+
+    return np.array(results)
