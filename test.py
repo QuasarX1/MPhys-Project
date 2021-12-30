@@ -8,9 +8,11 @@ from DataAccess import ParticleReadConversion_EagleSnapshot, Simulations, Simula
 
 sim = "Organic"
 model = "RECAL"
-tag = "019_z001p004"
+#tag = "019_z001p004"
+tag = "028_z000p000"
 
-relitive_data_root = "..\\..\\gm_for_mphys"
+#relitive_data_root = "..\\..\\gm_for_mphys"
+relitive_data_root = ".\\gm_for_mphys"
 
 
 
@@ -27,16 +29,17 @@ relitive_data_root = "..\\..\\gm_for_mphys"
 
 
 
-alternate_snapshot_object = ParticleReadConversion_EagleSnapshot("019_z001p004", Simulations.Organic, SimulationModels.RECAL, relitive_data_root)
+#alternate_snapshot_object = ParticleReadConversion_EagleSnapshot("019_z001p004", Simulations.Organic, SimulationModels.RECAL, relitive_data_root)
+alternate_snapshot_object = ParticleReadConversion_EagleSnapshot("028_z000p000", Simulations.Organic, SimulationModels.RECAL, relitive_data_root)
 
 print(alternate_snapshot_object.header)
 side_length = 100.0 * alternate_snapshot_object.hubble_paramiter / alternate_snapshot_object.expansion_factor# Side length 1 pMpc
 
 alternate_snapshot_object.select_region(0.0, side_length, 0.0, side_length, 0.0, side_length)
-gas_mass_alt = alternate_snapshot_object.particle_read(ParticleType.gas, "Mass", UnitSystem.physical)
+gas_mass_alt = alternate_snapshot_object.particle_read(ParticleType.gas, "Mass", unit_system = UnitSystem.physical)
 print("Alternate Gas Mass -", len(gas_mass_alt), "items:", gas_mass_alt)
 
-gas_locations = alternate_snapshot_object.particle_read(ParticleType.gas, "Coordinates", UnitSystem.physical)
+gas_locations = alternate_snapshot_object.particle_read(ParticleType.gas, "Coordinates", unit_system = UnitSystem.physical)
 plt.scatter(gas_locations[:, 0], gas_locations[:, 1])
 plt.show()
 plt.scatter(gas_locations[:, 2], gas_locations[:, 1])

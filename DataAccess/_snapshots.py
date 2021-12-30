@@ -82,7 +82,8 @@ class ParticleReadConversion_EagleSnapshot(pyread_eagle.EagleSnapshot):
                       upper_limits:          np.ndarray   = None,
                       unit_system:           UnitSystem   = UnitSystem.h_less_comoving_GADGET,
                       limits_unit_system:    UnitSystem   = UnitSystem.h_less_comoving_GADGET,
-                      use_vanilla_selection: bool         = False) -> np.ndarray:
+                      use_vanilla_selection: bool         = False,
+                      return_coordinates:    bool         = False) -> np.ndarray:
         """
         Loads particle data in the set region for a specified snapshot.
 
@@ -96,9 +97,11 @@ class ParticleReadConversion_EagleSnapshot(pyread_eagle.EagleSnapshot):
               UnitSystem unit_system           -> The unit system to convert the results into (default: UnitSystem.h_less_comoving_GADGET)
               UnitSystem limits_unit_system    -> The unit system that represents the values of the specified limits (default: UnitSystem.h_less_comoving_GADGET)
                     bool use_vanilla_selection -> Ignore specified limits and fall back on pyread_eagle.EagleSnapshot selection (default: False)
+                    bool return_coordinates    -> Return the coordinates associated with each particle (default: False)
 
         Returns:
             np.ndarray -> Numpy array containing the data from the specified field
+            np.ndarray -> Optionally provides an array of coordinates
         """
 
         if not use_vanilla_selection:
@@ -125,12 +128,15 @@ class ParticleReadConversion_EagleSnapshot(pyread_eagle.EagleSnapshot):
 
         # Load the data
         data_arr = self.read_dataset(particle_type.value, field_name)
+        particle_coordiantes = self.read_dataset(particle_type.value, "Coordinates")
         # Convert to numpy array with the correct data type
         dt = data_arr.dtype
         data_arr = np.array(data_arr, dtype = dt)
         if not use_vanilla_selection:
             # Remove excess particles that were loaded
-            data_arr = data_arr[(data_arr[:, 0] > lower_limits[0]) & (data_arr[:, 0] < upper_limits[0]) & (data_arr[:, 1] > lower_limits[1]) & (data_arr[:, 1] < upper_limits[1]) & (data_arr[:, 2] > lower_limits[2]) & (data_arr[:, 2] < upper_limits[2])]
+            filter = (particle_coordiantes[:, 0] > lower_limits[0]) & (particle_coordiantes[:, 0] < upper_limits[0]) & (particle_coordiantes[:, 1] > lower_limits[1]) & (particle_coordiantes[:, 1] < upper_limits[1]) & (particle_coordiantes[:, 2] > lower_limits[2]) & (particle_coordiantes[:, 2] < upper_limits[2])
+            data_arr = data_arr[filter]
+            particle_coordiantes = particle_coordiantes[filter]
 
 
         # Convert values - no corrections needed for integer type data
@@ -141,7 +147,19 @@ class ParticleReadConversion_EagleSnapshot(pyread_eagle.EagleSnapshot):
                 data_arr = np.array(data_arr, dtype = np.float64)
             data_arr = UnitSystem.convert_data(data_arr, UnitSystem.h_less_comoving_GADGET, unit_system, self.hubble_paramiter, h_scale_exponent, self.expansion_factor, a_scale_exponent, cgs_conversion_factor)
 
-        return data_arr
+        # Coordinates will require conversion
+        if return_coordinates:
+            # cgs numbers can be huge and overflow np.float32
+            # Recast the data to float64 to be safe
+            if unit_system == UnitSystem.cgs:
+                particle_coordiantes = np.array(particle_coordiantes, dtype = np.float64)
+            particle_coordiantes = UnitSystem.convert_data(particle_coordiantes, UnitSystem.h_less_comoving_GADGET, unit_system, self.hubble_paramiter, h_scale_exponent, self.expansion_factor, a_scale_exponent, cgs_conversion_factor)
+
+
+        if not return_coordinates:
+            return data_arr
+        else:
+            return data_arr, particle_coordiantes
 
     def centre_particles(self, coordinates, centre):
         """
@@ -162,7 +180,8 @@ class ParticleReadConversion_EagleSnapshot(pyread_eagle.EagleSnapshot):
                              centre:                np.ndarray,
                              radius:                float,
                              unit_system:           UnitSystem   = UnitSystem.h_less_comoving_GADGET,
-                             limits_unit_system:    UnitSystem   = UnitSystem.h_less_comoving_GADGET) -> np.ndarray:
+                             limits_unit_system:    UnitSystem   = UnitSystem.h_less_comoving_GADGET,
+                             return_coordinates:    bool         = False) -> np.ndarray:
         """
         Loads particle data in the set region for a specified snapshot.
 
@@ -176,9 +195,11 @@ class ParticleReadConversion_EagleSnapshot(pyread_eagle.EagleSnapshot):
               UnitSystem unit_system           -> The unit system to convert the results into (default: UnitSystem.h_less_comoving_GADGET)
               UnitSystem limits_unit_system    -> The unit system that represents the values of the specified limits (default: UnitSystem.h_less_comoving_GADGET)
                     bool use_vanilla_selection -> Ignore specified limits and fall back on pyread_eagle.EagleSnapshot selection (default: False)
+                    bool return_coordinates    -> Return the coordinates associated with each particle (default: False)
 
         Returns:
             np.ndarray -> Numpy array containing the data from the specified field
+            np.ndarray -> Optionally provides an array of coordinates
         """
 
         if limits_unit_system != UnitSystem.h_less_comoving_GADGET:
@@ -195,13 +216,16 @@ class ParticleReadConversion_EagleSnapshot(pyread_eagle.EagleSnapshot):
 
         # Load the data
         data_arr = self.read_dataset(particle_type.value, field_name)
+        coordinates = self.read_dataset(particle_type.value, "Coordinates")
+
         # Convert to numpy array with the correct data type
         dt = data_arr.dtype
         data_arr = np.array(data_arr, dtype = dt)
         # Centre the region coordinates
-        data_arr = self.centre_particles(data_arr, centre)
+        coordinates = self.centre_particles(coordinates, centre)
         # Remove excess particles that were loaded
-        data_arr = data_arr[(data_arr**2).sum(axis = 1) < radius**2]
+        data_arr = data_arr[(coordinates**2).sum(axis = 1) < radius**2]
+        coordinates = coordinates[(coordinates**2).sum(axis = 1) < radius**2]
 
 
         # Convert values - no corrections needed for integer type data
@@ -212,7 +236,19 @@ class ParticleReadConversion_EagleSnapshot(pyread_eagle.EagleSnapshot):
                 data_arr = np.array(data_arr, dtype = np.float64)
             data_arr = UnitSystem.convert_data(data_arr, UnitSystem.h_less_comoving_GADGET, unit_system, self.hubble_paramiter, h_scale_exponent, self.expansion_factor, a_scale_exponent, cgs_conversion_factor)
 
-        return data_arr
+        # Coordinates will require conversion
+        if return_coordinates:
+            # cgs numbers can be huge and overflow np.float32
+            # Recast the data to float64 to be safe
+            if unit_system == UnitSystem.cgs:
+                coordinates = np.array(coordinates, dtype = np.float64)
+            coordinates = UnitSystem.convert_data(coordinates, UnitSystem.h_less_comoving_GADGET, unit_system, self.hubble_paramiter, h_scale_exponent, self.expansion_factor, a_scale_exponent, cgs_conversion_factor)
+
+
+        if not return_coordinates:
+            return data_arr
+        else:
+            return data_arr, coordinates
 
     def convert_particle_values(self, data, from_unit, to_unit, particle_type, field_name):
         return UnitSystem.convert_data(data, from_unit, to_unit, self.hubble_paramiter, self.h_scale_exponent_values[particle_type][field_name], self.expansion_factor, self.a_scale_exponent_values[particle_type][field_name], self.cgs_conversion_factor_values[particle_type][field_name])
