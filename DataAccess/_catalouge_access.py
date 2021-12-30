@@ -115,7 +115,7 @@ def particles_by_group(tag:           str,
                        data_root:     str,
                        verbose:       bool             = False):
     """
-    Load the particle IDs, subgroup numbers and group numbers for particles in a tag.
+    Load the particle IDs, subgroup number and group number and the binding energy for particles in a tag.
 
     Paramiters:
                      str tag           -> Snapshot identifier
@@ -130,9 +130,9 @@ def particles_by_group(tag:           str,
     """
 
     subfind_particles_folder = os.path.join(data_root, SimulationModels.to_string(model), Simulations.to_string(simulation), f"particledata_{tag}")
-    subfind_file_template = os.path.join(group_folder, f"eagle_subfind_particles_{tag}.{{}}.hdf5")
+    subfind_file_template = os.path.join(subfind_particles_folder, f"eagle_subfind_particles_{tag}.{{}}.hdf5")
 
-    file_numbers = [int(file_name[37:-5]) for file_name in os.listdir(group_folder) if file_name[:23] == "eagle_subfind_particles"]
+    file_numbers = [int(file_name[37:-5]) for file_name in os.listdir(subfind_particles_folder) if file_name[:23] == "eagle_subfind_particles"]
     file_numbers.sort()
     results = [[], [], [], []]
     for file_number in file_numbers:
