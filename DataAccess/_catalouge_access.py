@@ -113,6 +113,7 @@ def particles_by_group(tag:           str,
                        simulation:    Simulations,
                        model:         SimulationModels,
                        data_root:     str,
+                       fields:        list,
                        verbose:       bool             = False):
     """
     Load the particle IDs, subgroup number and group number and the binding energy for particles in a tag.
@@ -123,30 +124,44 @@ def particles_by_group(tag:           str,
              Simulations simulation    -> The target simulation specified with an enum
         SimulationModels model         -> The target simulation model specified with an enum
                      str data_root     -> The filepath to the root of the GM simulations directory
+                    list fields        -> The fields to read (a list of strings)
                     bool verbose       -> Print out progress infomation (default: False)
 
     Returns:
         np.ndarray -> Numpy array containing the particle ID, the associated group number, the associated subgroup number and the binding energy
     """
 
+    if len(fields) == 0:
+        raise ValueError("No fields were specified.")
+
+    particle_type_number = particle_type.value
+
     subfind_particles_folder = os.path.join(data_root, SimulationModels.to_string(model), Simulations.to_string(simulation), f"particledata_{tag}")
     subfind_file_template = os.path.join(subfind_particles_folder, f"eagle_subfind_particles_{tag}.{{}}.hdf5")
 
     file_numbers = [int(file_name[37:-5]) for file_name in os.listdir(subfind_particles_folder) if file_name[:23] == "eagle_subfind_particles"]
     file_numbers.sort()
-    results = [[], [], [], []]
+    results = None
+    firstFile = True
+    resultIndexPointer = 0
     for file_number in file_numbers:
         with h5.File(subfind_file_template.format(file_number), "r") as datafile:
-            particle_type_number = particle_type.value
+            if firstFile:
+                results = np.empty(shape = (len(fields), datafile["/Header"].attrs["NumPart_Total"][particle_type_number]))
+                firstFile = False
+            inThisFile = datafile["/Header"].attrs["NumPart_ThisFile"][particle_type_number]
+            nextIndexPointer = resultIndexPointer + inThisFile
+            
             try:
-                results[0].append(datafile[f"/PartType{particle_type_number}/ParticleIDs"])# Particles
-                results[1].append(datafile[f"/PartType{particle_type_number}/GroupNumber"])# Associated Groups
-                results[2].append(datafile[f"/PartType{particle_type_number}/SubGroupNumber"])# Associated Subgroups
-                results[3].append(datafile[f"/PartType{particle_type_number}/ParticleBindingEnergy"])# Associated Binding Energy
+                for i, field in enumerate(fields):
+                    results[i, resultIndexPointer:nextIndexPointer] = np.array(datafile[f"/PartType{particle_type_number}/{field}"])
+                if verbose:
+                    print(f"Read data from file number {file_number}.")
+                resultIndexPointer = nextIndexPointer
             except KeyError:
                 if verbose:
-                    print(f"No data avalible fron file number {file_number}.")
+                    print(f"No data avalible from file number {file_number}.")
 
-            if verbose: print("Run out of files after loading", file_number)
+    if verbose: print("Run out of files after loading", file_number)
 
     return np.array(results)

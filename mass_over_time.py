@@ -19,26 +19,35 @@ Repeat.
 
 def get_most_bound_particles(tag, simulation, halo, subhalo):
     n = 100
-    group_particles = particles_by_group(tag, ParticleType.dark_matter, simulation, SimulationModels.RECAL, relitive_data_root)
-    group_particles = group_particles[(group_particles[:, 1] == halo) & (group_particles[:, 2] == subhalo)]
+    fields = ["ParticleIDs", "GroupNumber", "SubGroupNumber", "ParticleBindingEnergy"]
+    print(f"Reading data for tag {tag}:")
+    group_particles = particles_by_group(tag, ParticleType.dark_matter, simulation, SimulationModels.RECAL, relitive_data_root, fields, verbose = True)#TODO: remove verbose
+    print()
+    group_particles = group_particles[:, (group_particles[1, :] == halo) & (group_particles[2, :] == subhalo)]
     
     most_bound_IDs = []
     
-    most_bound_IDs.append(group_particles[np.where(group_particles[:, 3] == group_particles[:, 3].min())[0], 0])
+    most_bound_IDs.append(group_particles[0, np.where(group_particles[3, :] == group_particles[3, :].min())[0]][0])
     for _ in range(1, n):
-        most_bound_IDs.append(group_particles[np.in1d(group_particles[:, 0], most_bound_IDs)][np.where(group_particles[:, 3] == group_particles[:, 3].max())[0], 0])
+        most_bound_IDs.append(group_particles[:, True ^ np.in1d(group_particles[0, :], most_bound_IDs)][0, np.where(group_particles[3, :] == group_particles[3, :].min())[0]][0])
 
     return most_bound_IDs
 
 def get_greatest_particle_membership(tag, simulation, particle_IDs):
-    all_particles = particles_by_group(tag, ParticleType.dark_matter, simulation, SimulationModels.RECAL, relitive_data_root)
-    selected_particles = all_particles[np.in1d(all_particles[:, 0], particle_IDs)]
+    fields = ["ParticleIDs", "GroupNumber", "SubGroupNumber"]
+    all_particles = particles_by_group(tag, ParticleType.dark_matter, simulation, SimulationModels.RECAL, relitive_data_root, fields)
+    selected_particles = all_particles[:, np.in1d(all_particles[0, :], particle_IDs)]
 
-    halo_values, halo_counts = np.unique(selected_particles[:, 1], return_counts=True)
-    most_common_halo = halo_values[halo_counts.argmax()]
+    halo_values, halo_counts = np.unique(selected_particles[1, :], return_counts=True)
+    if len(halo_counts) > 0:
+        most_common_halo = halo_values[halo_counts.argmax()]
 
-    sub_halo_values, sub_halo_counts = np.unique(selected_particles[selected_particles[:, 1] == most_common_halo][:, 2], return_counts=True)
-    most_common_sub_halo = sub_halo_values[sub_halo_counts.argmax()]
+        sub_halo_values, sub_halo_counts = np.unique(selected_particles[:, selected_particles[1, :] == most_common_halo][2, :], return_counts=True)
+        most_common_sub_halo = sub_halo_values[sub_halo_counts.argmax()] if len(sub_halo_counts) > 0 else None
+
+    else:# None of the requested particles were part of a registered halo or subhalo
+        most_common_halo = None
+        most_common_sub_halo = None
 
     return most_common_halo, most_common_sub_halo
 
@@ -48,27 +57,42 @@ halo_numbers = [[], [], []]
 sub_halo_numbers = [[], [], []]
 reversed_tags = list(constants.tags)
 reversed_tags.reverse()
-for i, simulation in enumerate((Simulations.Early, Simulations.Organic, Simulations.Late)):
+#for i, simulation in enumerate((Simulations.Early, Simulations.Organic, Simulations.Late)):
+for i, simulation in enumerate((Simulations.Organic, Simulations.Organic, Simulations.Organic)):
     max_mass_index = load_catalouge_field("Mass", "Subhalo", constants.tags[-1], simulation, SimulationModels.RECAL, relitive_data_root).argmax()
     current_halo = load_catalouge_field("GroupNumber", "Subhalo", constants.tags[-1], simulation, SimulationModels.RECAL, relitive_data_root)[max_mass_index]
     current_sub_halo = load_catalouge_field("SubGroupNumber", "Subhalo", constants.tags[-1], simulation, SimulationModels.RECAL, relitive_data_root)[max_mass_index]
 
+    
+    skipFile = False
     for j, tag in enumerate(reversed_tags):
-        halo_numbers[i].append(current_halo)
-        sub_halo_numbers[i].append(current_sub_halo)
+        if not skipFile:
+            halo_numbers[i].append(current_halo)
+            sub_halo_numbers[i].append(current_sub_halo)
+        else:
+            halo_numbers[i].append(None)
+            sub_halo_numbers[i].append(None)
 
         if j == len(reversed_tags) - 2:
             break
 
-        particle_IDs = get_most_bound_particles(tag, simulation, current_halo, current_sub_halo)
+        if not skipFile:
+            particle_IDs = get_most_bound_particles(tag, simulation, current_halo, current_sub_halo)
 
-        current_halo, current_sub_halo = get_greatest_particle_membership(reversed_tags[i + 1], simulation, particle_IDs)
+        skipFile = False
 
-halo_numbers.append(None)
-sub_halo_numbers.append(None)
+        try:
+            current_halo, current_sub_halo = get_greatest_particle_membership(reversed_tags[j + 1], simulation, particle_IDs)
+        except OSError:
+            skipFile = True
+        if current_sub_halo == None:
+            skipFile = True
 
-halo_numbers.reverse()
-sub_halo_numbers.reverse()
+    halo_numbers[i].append(None)
+    sub_halo_numbers[i].append(None)
+
+    halo_numbers[i].reverse()
+    sub_halo_numbers[i].reverse()
 
 halo_numbers = np.array(halo_numbers)
 sub_halo_numbers = np.array(sub_halo_numbers)
