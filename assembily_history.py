@@ -102,8 +102,10 @@ assembily_history = {
     }
 }
 
-physical_centeral_mass_positions = [[], [], []]
+#physical_centeral_mass_positions = [[], [], []]
+physical_centeral_mass_positions = {}
 for i, simulation in enumerate((Simulations.Early, Simulations.Organic, Simulations.Late)):
+    physical_centeral_mass_positions[simulation] = {}
     for tag in constants.tags:
         try:
             halo = assembily_history[Simulations.Early][tag]["halo"]
@@ -119,11 +121,13 @@ for i, simulation in enumerate((Simulations.Early, Simulations.Organic, Simulati
             potential_centre = load_catalouge_field("CentreOfPotential", "Subhalo", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)
             group_number = load_catalouge_field("GroupNumber", "Subhalo", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)
             sub_group_number = load_catalouge_field("SubGroupNumber", "Subhalo", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)
-            physical_centeral_mass_positions[i].append(potential_centre[(group_number == halo) & (sub_group_number == subhalo)][0])
+            #physical_centeral_mass_positions[i].append(potential_centre[(group_number == halo) & (sub_group_number == subhalo)][0])
+            physical_centeral_mass_positions[simulation][tag] = potential_centre[(group_number == halo) & (sub_group_number == subhalo)][0]
         except LookupError:
-            physical_centeral_mass_positions[i].append(None)
+            #physical_centeral_mass_positions[i].append(None)
+            physical_centeral_mass_positions[simulation][tag] = None
 
-physical_centeral_mass_positions = np.array(physical_centeral_mass_positions)
+#physical_centeral_mass_positions = np.array(physical_centeral_mass_positions)
 
 #print(physical_centeral_mass_positions[0, -1] - physical_centeral_mass_positions[1, -1])
 #print(physical_centeral_mass_positions[1, -1])

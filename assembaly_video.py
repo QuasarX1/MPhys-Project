@@ -6,7 +6,7 @@ import cv2
 
 from DataAccess import constants, load_catalouge_field, ParticleReadConversion_EagleSnapshot, Simulations, SimulationModels, ParticleType, UnitSystem
 
-from assembily_history import physical_centeral_mass_positions
+from assembily_history import physical_centeral_mass_positions, assembily_history
 
 model = SimulationModels.RECAL
 
@@ -29,6 +29,13 @@ for i in range(len(simulations)):
             potential_centre = load_catalouge_field("GroupCentreOfPotential", "FOF", tag, simulations[i], SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)[object_masses == object_masses.max()][0]
             r_200 = load_catalouge_field("Group_R_Crit200", "FOF", tag, simulations[i], SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)[object_masses == object_masses.max()][0]
             r_200 = r_200 / 8#TODO: why is the R_200 too large???
+
+            potential_centre = physical_centeral_mass_positions[i, j]
+            if potential_centre is None:
+                raise LookupError("The file either had no objects or was corrupted.")
+
+            r_200 = load_catalouge_field("Group_R_Crit200", "FOF", tag, simulations[i], SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)[assembily_history[simulations[i]][tag]["halo"] - 1]
+            
         except LookupError:
             continue# No objects in this snapshot - probably the first snapshot so just start the next one
 
