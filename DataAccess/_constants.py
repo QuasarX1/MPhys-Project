@@ -1,3 +1,5 @@
+import h5py as h5
+
 tags = ("000_z020p000", "001_z015p132", "002_z009p993",
         "003_z008p988", "004_z008p075", "005_z007p050",
         "006_z005p971", "007_z005p487", "008_z005p037",
@@ -8,3 +10,20 @@ tags = ("000_z020p000", "001_z015p132", "002_z009p993",
         "021_z000p736", "022_z000p615", "023_z000p503",
         "024_z000p366", "025_z000p271", "026_z000p183",
         "027_z000p101", "028_z000p000")
+
+class SimulationConstants(object):
+    __simulation_constants = None
+
+    def __init__(self, filepath: str):
+        #from DataAccess._catalouge_access import load_catalouge_field
+        #load_catalouge_field
+        
+        with h5.File(filepath, "r") as datafile:
+            self.__values = dict(datafile["Constants"].attrs)
+
+    @staticmethod
+    def get_constants():
+        if SimulationConstants.__simulation_constants is None:
+            SimulationConstants.__simulation_constants = SimulationConstants("./gm_for_mphys/RECAL/Organic/groups_028_z000p000/eagle_subfind_tab_028_z000p000.0.hdf5")
+            
+        return SimulationConstants.__simulation_constants.__values.copy()

@@ -7,12 +7,15 @@ from assembily_history import assembily_history
 relitive_data_root = ".\\gm_for_mphys"
 
 def total_mass_M200(halo, subhalo, tag, simulation):
-    return load_catalouge_field("Group_M_Crit200", "FOF", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)[halo - 1]
+    return UnitSystem.convert_mass_to_solar(load_catalouge_field("Group_M_Crit200", "FOF", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.cgs)[halo - 1])
 
 def _particle_type_mass(particle_type, halo, subhalo, tag, simulation):
-    first_subhalo_index = load_catalouge_field("FirstSubhaloID", "FOF", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)[halo - 1]
+    first_subhalo_index = load_catalouge_field("FirstSubhaloID", "FOF", tag, simulation, SimulationModels.RECAL, relitive_data_root)[halo - 1]
     subhalo_index = first_subhalo_index + subhalo
-    return load_catalouge_field("ApertureMeasurements/Mass/030kpc", "Subhalo", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)[subhalo_index][particle_type.value]
+    return UnitSystem.convert_mass_to_solar(load_catalouge_field("ApertureMeasurements/Mass/030kpc", "Subhalo", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.cgs)[subhalo_index][particle_type.value])
+
+def gas_mass(*args, **kwargs):
+    return _particle_type_mass(ParticleType.gas, *args, **kwargs)
 
 def stellar_mass(*args, **kwargs):
     return _particle_type_mass(ParticleType.star, *args, **kwargs)
@@ -24,10 +27,10 @@ def dark_matter_mass(*args, **kwargs):
     return _particle_type_mass(ParticleType.dark_matter, *args, **kwargs)
 
 def baryon_mass(halo, subhalo, tag, simulation):
-    first_subhalo_index = load_catalouge_field("FirstSubhaloID", "FOF", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)[halo - 1]
+    first_subhalo_index = load_catalouge_field("FirstSubhaloID", "FOF", tag, simulation, SimulationModels.RECAL, relitive_data_root)[halo - 1]
     subhalo_index = first_subhalo_index + subhalo
-    masses = load_catalouge_field("ApertureMeasurements/Mass/030kpc", "Subhalo", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)[subhalo_index]
-    return masses[ParticleType.gas.value] + masses[ParticleType.star.value] + masses[ParticleType.black_hole.value]
+    masses = load_catalouge_field("ApertureMeasurements/Mass/030kpc", "Subhalo", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.cgs)[subhalo_index]
+    return UnitSystem.convert_mass_to_solar(masses[ParticleType.gas.value] + masses[ParticleType.star.value] + masses[ParticleType.black_hole.value])
 
 
 
@@ -38,7 +41,6 @@ def produce_simulations_graph(func, y_axis_label, graph_title_partial, log_x = F
     for i, simulation in enumerate((Simulations.Early, Simulations.Organic, Simulations.Late)):
         mass_values.append(np.empty(shape = (len(constants.tags), )))
         snapshot_numbers.append(np.array([float("{}.{}".format(tag[5:8], tag[9:12])) for tag in constants.tags]))
-        #snapshot_numbers.append(np.array(constants.tags))
         for j, tag in enumerate(constants.tags):
             try:
                 halo = assembily_history[simulation][tag]["halo"]
@@ -47,10 +49,6 @@ def produce_simulations_graph(func, y_axis_label, graph_title_partial, log_x = F
                     raise LookupError("No history avalible.")
 
                 mass_values[i][j] = func(halo, subhalo, tag, simulation)
-
-                #first_subhalo_index = load_catalouge_field("FirstSubhaloID", "FOF", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)[halo - 1]
-                #subhalo_index = first_subhalo_index + subhalo
-                #mass_values[i][j] = load_catalouge_field("ApertureMeasurements/Mass/030kpc", "Subhalo", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)[subhalo_index][ParticleType.star.value]
 
             except LookupError:
                 mass_values[i][j] = None
@@ -124,10 +122,15 @@ def produce_single_simulation_graphs(funcs, quantity_labels, y_axis_label, graph
 
 
 
-#produce_simulations_graph(total_mass_M200, y_axis_label = "$M_{200}$", graph_title_partial = "Group_M_Crit200", log_x = True, log_y = True)
-#produce_simulations_graph(stellar_mass, y_axis_label = "M*$", graph_title_partial = "Central Subhalo Stellar Mass", log_x = True, log_y = True)
-#produce_simulations_graph(black_hole_mass, y_axis_label = "$M_{BH}$", graph_title_partial = "Central Subhalo Black Hole Mass", log_x = True, log_y = True)
-#produce_simulations_graph(dark_matter_mass, y_axis_label = "$M_{DM}$", graph_title_partial = "Central Subhalo Dark Matter Mass", log_x = True, log_y = True)
-#produce_simulations_graph(baryon_mass, y_axis_label = "$M_{Baryonic}$", graph_title_partial = "Central Subhalo Baryonic Mass", log_x = True, log_y = True)
+if __name__ == "__main__":
+    #produce_simulations_graph(total_mass_M200, y_axis_label = "$M_{200}$ ($M_{sun}$)", graph_title_partial = "Group_M_Crit200", log_x = True, log_y = True)
+    #produce_simulations_graph(stellar_mass, y_axis_label = "M* ($M_{sun}$)", graph_title_partial = "Central Subhalo Stellar Mass", log_x = True, log_y = True)
+    #produce_simulations_graph(black_hole_mass, y_axis_label = "$M_{BH}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Black Hole Mass", log_x = True, log_y = True)
+    #produce_simulations_graph(dark_matter_mass, y_axis_label = "$M_{DM}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Dark Matter Mass", log_x = True, log_y = True)
+    #produce_simulations_graph(baryon_mass, y_axis_label = "$M_{Baryonic}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Baryonic Mass", log_x = True, log_y = True)
+    #t = -7#8
+    #print(assembily_history[Simulations.Early][constants.tags[t]])
+    #a = gas_mass(assembily_history[Simulations.Early][constants.tags[t]]["halo"], assembily_history[Simulations.Early][constants.tags[t]]["subhalo"], constants.tags[t], Simulations.Early)
+    produce_single_simulation_graphs([dark_matter_mass, gas_mass, stellar_mass, black_hole_mass], ["Dark Matter", "Gas", "Stars", "Black Holes"], y_axis_label = "Mass ($M_{sun}$)", graph_title_partial = "Central Subhalo Mass Brakedown (r = 30 kPc)", log_x = True, log_y = True)
 
-produce_single_simulation_graphs([total_mass_M200, dark_matter_mass, baryon_mass], ["Halo $M_{200}$", "Dark Matter", "Baryonic Matter"], y_axis_label = "M", graph_title_partial = "Central Subhalo Mass", log_x = True, log_y = True)
+    #produce_single_simulation_graphs([total_mass_M200, dark_matter_mass, baryon_mass, lambda *args, **kwargs: dark_matter_mass(*args, **kwargs) + baryon_mass(*args, **kwargs)], ["Halo $M_{200}$", "Dark Matter (r = 30 kPc)", "Baryonic Matter (r = 30 kPc)", "All Matter (r = 30 kPc)"], y_axis_label = "Mass ($M_{sun}$)", graph_title_partial = "Central Subhalo Mass", log_x = True, log_y = True)

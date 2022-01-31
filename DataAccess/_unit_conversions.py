@@ -1,6 +1,8 @@
 from enum import Enum
 import numpy as np
 
+from DataAccess._constants import SimulationConstants
+
 class UnitSystem(Enum):
     """
     Systems of units that are accepted paramiters for functions in the "DataAccess" package.
@@ -82,3 +84,31 @@ class UnitSystem(Enum):
                 raise ValueError("Value of \"UnitSystem\" object was unexpected.")
     
         return data
+
+    @staticmethod
+    def convert_mass_to_solar(data: np.ndarray):
+        """
+        Converts mass value(s) to solar masses. This assumes input values are represented by the 'UnitSystem.cgs' system.
+
+        Paramiters:
+            (np.ndarray or float) data -> The value(s) to be converted
+
+        Returns:
+            (np.ndarray or float) -> The converted value(s)
+        """
+
+        return data / SimulationConstants.get_constants()["SOLAR_MASS"]
+
+    @staticmethod
+    def convert_mass_from_solar(data: np.ndarray):
+        """
+        Converts mass value(s) to 'UnitSystem.cgs'. This assumes input values are in solar masses.
+
+        Paramiters:
+            (np.ndarray or float) data -> The value(s) to be converted
+
+        Returns:
+            (np.ndarray or float) -> The converted value(s)
+        """
+
+        return data * SimulationConstants.get_constants()["SOLAR_MASS"]
