@@ -14,16 +14,16 @@ tags = ("000_z020p000", "001_z015p132", "002_z009p993",
 class SimulationConstants(object):
     __simulation_constants = None
 
-    def __init__(self, filepath: str):
+    def __init__(self):
         #from DataAccess._catalouge_access import load_catalouge_field
         #load_catalouge_field
         
-        with h5.File(filepath, "r") as datafile:
+        with h5.File("./gm_for_mphys/RECAL/Organic/groups_028_z000p000/eagle_subfind_tab_028_z000p000.0.hdf5", "r") as datafile:
             self.__values = dict(datafile["Constants"].attrs)
 
     @staticmethod
     def get_constants():
         if SimulationConstants.__simulation_constants is None:
-            SimulationConstants.__simulation_constants = SimulationConstants("./gm_for_mphys/RECAL/Organic/groups_028_z000p000/eagle_subfind_tab_028_z000p000.0.hdf5")
+            SimulationConstants.__simulation_constants = SimulationConstants()
             
         return SimulationConstants.__simulation_constants.__values.copy()
