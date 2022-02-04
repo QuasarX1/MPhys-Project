@@ -123,9 +123,9 @@ def produce_single_simulation_graphs(funcs, quantity_labels, y_axis_label, graph
 
 
 if __name__ == "__main__":
-    #produce_simulations_graph(total_mass_M200, y_axis_label = "$M_{200}$ ($M_{sun}$)", graph_title_partial = "Group_M_Crit200", log_x = True, log_y = True)
-    #produce_simulations_graph(stellar_mass, y_axis_label = "M* ($M_{sun}$)", graph_title_partial = "Central Subhalo Stellar Mass", log_x = True, log_y = True)
-    #produce_simulations_graph(black_hole_mass, y_axis_label = "$M_{BH}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Black Hole Mass", log_x = True, log_y = True)
+    produce_simulations_graph(total_mass_M200, y_axis_label = "$M_{200}$ ($M_{sun}$)", graph_title_partial = "Group_M_Crit200", log_x = True, log_y = True)
+    produce_simulations_graph(stellar_mass, y_axis_label = "M* ($M_{sun}$)", graph_title_partial = "Central Subhalo Stellar Mass", log_x = True, log_y = True)
+    produce_simulations_graph(black_hole_mass, y_axis_label = "$M_{BH}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Black Hole Mass", log_x = True, log_y = True)
     #produce_simulations_graph(dark_matter_mass, y_axis_label = "$M_{DM}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Dark Matter Mass", log_x = True, log_y = True)
     #produce_simulations_graph(baryon_mass, y_axis_label = "$M_{Baryonic}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Baryonic Mass", log_x = True, log_y = True)
     #t = -7#8

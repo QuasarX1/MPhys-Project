@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-from DataAccess import ParticleReadConversion_EagleSnapshot, Simulations, SimulationModels, ParticleType, UnitSystem
+from DataAccess import ParticleReadConversion_EagleSnapshot, Simulations, SimulationModels, ParticleType, UnitSystem, constants
 
 from assembily_history import physical_centeral_mass_positions
 
@@ -25,7 +25,8 @@ relitive_data_root = ".\\gm_for_mphys"
 #                  organic_galaxy_centre_physical_units,
 #                  organic_galaxy_centre_physical_units + np.array([-0.839489, -0.5783951, -0.05172157])]
 
-galaxy_centres = physical_centeral_mass_positions[:, -1]
+#galaxy_centres = physical_centeral_mass_positions[:, -1]
+galaxy_centres = [physical_centeral_mass_positions[sim][constants.tags[-1]] for sim in Simulations]
 
 galaxy_picture_edge_offsets = [0.15, 0.025, 0.025]
 

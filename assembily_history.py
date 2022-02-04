@@ -102,7 +102,6 @@ assembily_history = {
     }
 }
 
-#physical_centeral_mass_positions = [[], [], []]
 physical_centeral_mass_positions = {}
 for i, simulation in enumerate((Simulations.Early, Simulations.Organic, Simulations.Late)):
     physical_centeral_mass_positions[simulation] = {}
@@ -114,24 +113,13 @@ for i, simulation in enumerate((Simulations.Early, Simulations.Organic, Simulati
             if halo is None or subhalo is None:
                 raise LookupError("No history avalible.")
 
-            #object_masses = load_catalouge_field("GroupMass", "FOF", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)
-            #potential_centre = load_catalouge_field("GroupCentreOfPotential", "FOF", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)
-            #physical_centeral_mass_positions[i].append(potential_centre[object_masses == object_masses.max()][0])
-
-            potential_centre = load_catalouge_field("CentreOfPotential", "Subhalo", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)
-            group_number = load_catalouge_field("GroupNumber", "Subhalo", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)
-            sub_group_number = load_catalouge_field("SubGroupNumber", "Subhalo", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)
-            #physical_centeral_mass_positions[i].append(potential_centre[(group_number == halo) & (sub_group_number == subhalo)][0])
+            #potential_centre = load_catalouge_field("CentreOfPotential", "Subhalo", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.physical)
+            potential_centre = load_catalouge_field("CentreOfPotential", "Subhalo", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.cgs)
+            group_number = load_catalouge_field("GroupNumber", "Subhalo", tag, simulation, SimulationModels.RECAL, relitive_data_root)
+            sub_group_number = load_catalouge_field("SubGroupNumber", "Subhalo", tag, simulation, SimulationModels.RECAL, relitive_data_root)
             physical_centeral_mass_positions[simulation][tag] = potential_centre[(group_number == halo) & (sub_group_number == subhalo)][0]
         except LookupError:
-            #physical_centeral_mass_positions[i].append(None)
             physical_centeral_mass_positions[simulation][tag] = None
-
-#physical_centeral_mass_positions = np.array(physical_centeral_mass_positions)
-
-#print(physical_centeral_mass_positions[0, -1] - physical_centeral_mass_positions[1, -1])
-#print(physical_centeral_mass_positions[1, -1])
-#print(physical_centeral_mass_positions[2, -1] - physical_centeral_mass_positions[1, -1])
 
 
 

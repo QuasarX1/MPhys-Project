@@ -11,6 +11,8 @@ def func(halo, subhalo, tag, simulation):
     stellar_mass = UnitSystem.convert_mass_to_solar(load_catalouge_field("MassType", "Subhalo", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.cgs)[subhalo_index][ParticleType.star.value])
     
     star_formation_rate = UnitSystem.convert_mass_to_solar(load_catalouge_field("StarFormationRate", "Subhalo", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.cgs)[subhalo_index])
+    # Per second to per year convertion
+    star_formation_rate *= constants.SimulationConstants.get_constants()["SEC_PER_YEAR"]
 
     return star_formation_rate / stellar_mass
 

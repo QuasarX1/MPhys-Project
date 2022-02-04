@@ -10,6 +10,8 @@ class UnitSystem(Enum):
     h_less_comoving_GADGET = 0
     physical = 1
     cgs = 2
+    physical_comoving = 3
+    cgs_comoving = 4
 
     @staticmethod
     def convert_data(data: np.ndarray, from_unit, to_unit, h = None, h_scale_exponent = None, a = None, a_scale_exponent = None, cgs_conversion_factor = None) -> np.ndarray:
@@ -24,7 +26,7 @@ class UnitSystem(Enum):
                             float h_scale_exponent      -> Exponent to apply to the value of h
                             float a                     -> Expansion Factor
                             float a_scale_exponent      -> Exponent to apply to the value of a
-                            float cgs_conversion_factor -> Conversion factor between GADGET and cgs systems
+                            float cgs_conversion_factor -> Conversion factor between physical and cgs systems
 
         Returns:
             (np.ndarray or float) -> The converted value(s)
@@ -50,38 +52,47 @@ class UnitSystem(Enum):
 
                 elif to_unit == UnitSystem.cgs:
                     if cgs_conversion_factor is None:
-                        raise ValueError("Values were not provided for the following paramiters: \"cgs_conversion_factor\"")
-                    data *= cgs_conversion_factor
+                        raise ValueError("Values were not provided for the following paramiters: \"h\", \"h_scale_exponent\", \"a\", \"a_scale_exponent\", \"cgs_conversion_factor\"")
+                    data = UnitSystem.convert_data(data, from_unit, UnitSystem.physical, h, h_scale_exponent, a, a_scale_exponent, cgs_conversion_factor) * cgs_conversion_factor
+                    
+
+                elif to_unit == UnitSystem.physical_comoving:
+                    if None in (h, h_scale_exponent):
+                        raise ValueError("Values were not provided for the following paramiters: \"h\", \"h_scale_exponent\", \"a\", \"a_scale_exponent\", \"cgs_conversion_factor\"")
+                    data *= np.power(h, h_scale_exponent)
+
+
+                elif to_unit == UnitSystem.cgs_comoving:
+                    if cgs_conversion_factor is None:
+                        raise ValueError("Values were not provided for the following paramiters: \"h\", \"h_scale_exponent\", \"a\", \"a_scale_exponent\", \"cgs_conversion_factor\"")
+                    data = UnitSystem.convert_data(data, from_unit, UnitSystem.physical_comoving, h, h_scale_exponent, a, a_scale_exponent, cgs_conversion_factor) * cgs_conversion_factor
 
                 else:
                     raise ValueError("Value of \"UnitSystem\" object was unexpected.")
 
-            elif from_unit == UnitSystem.physical:
-                if to_unit == UnitSystem.h_less_comoving_GADGET:
+            elif to_unit == UnitSystem.h_less_comoving_GADGET:
+                if from_unit == UnitSystem.physical:
                     if None in (h, h_scale_exponent, a, a_scale_exponent):
                         raise ValueError("Values were not provided for the following paramiters: \"h\", \"h_scale_exponent\", \"a\", \"a_scale_exponent\"")
                     data /= np.power(h, h_scale_exponent) * np.power(a, a_scale_exponent)
 
-                elif to_unit == UnitSystem.cgs:
-                    data = UnitSystem.convert_data(UnitSystem.convert_data(data, from_unit, UnitSystem.h_less_comoving_GADGET, h, h_scale_exponent, a, a_scale_exponent, cgs_conversion_factor), UnitSystem.h_less_comoving_GADGET, to_unit, h, h_scale_exponent, a, a_scale_exponent, cgs_conversion_factor)
-
-                else:
-                    raise ValueError("Value of \"UnitSystem\" object was unexpected.")
-
-            elif from_unit == UnitSystem.cgs:
-                if to_unit == UnitSystem.h_less_comoving_GADGET:
-                    if cgs_conversion_factor is None:
+                elif from_unit == UnitSystem.cgs:
+                    if None in (h, h_scale_exponent, a, a_scale_exponent, cgs_conversion_factor):
                         raise ValueError("Values were not provided for the following paramiters: \"cgs_conversion_factor\"")
-                    data /= cgs_conversion_factor
+                    data /= np.power(h, h_scale_exponent) * np.power(a, a_scale_exponent) * cgs_conversion_factor
 
-                elif to_unit == UnitSystem.physical:
-                    data = UnitSystem.convert_data(UnitSystem.convert_data(data, from_unit, UnitSystem.h_less_comoving_GADGET, h, h_scale_exponent, a, a_scale_exponent, cgs_conversion_factor), UnitSystem.h_less_comoving_GADGET, to_unit, h, h_scale_exponent, a, a_scale_exponent, cgs_conversion_factor)
+                elif from_unit == UnitSystem.physical_comoving:
+                    if None in (h, h_scale_exponent):
+                        raise ValueError("Values were not provided for the following paramiters: \"cgs_conversion_factor\"")
+                    data /= np.power(h, h_scale_exponent)
 
-                else:
-                    raise ValueError("Value of \"UnitSystem\" object was unexpected.")
+                elif from_unit == UnitSystem.cgs_comoving:
+                    if None in (h, h_scale_exponent, cgs_conversion_factor):
+                        raise ValueError("Values were not provided for the following paramiters: \"cgs_conversion_factor\"")
+                    data /= np.power(h, h_scale_exponent) * cgs_conversion_factor
 
             else:
-                raise ValueError("Value of \"UnitSystem\" object was unexpected.")
+                data = UnitSystem.convert_data(UnitSystem.convert_data(data, from_unit, UnitSystem.h_less_comoving_GADGET, h, h_scale_exponent, a, a_scale_exponent, cgs_conversion_factor), UnitSystem.h_less_comoving_GADGET, to_unit, h, h_scale_exponent, a, a_scale_exponent, cgs_conversion_factor)
     
         return data
 
