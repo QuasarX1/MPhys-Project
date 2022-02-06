@@ -17,12 +17,15 @@ def func(halo, subhalo, tag, simulation):
 
     # Get massesfor each particle type in R_200
     snapshot = ParticleReadConversion_EagleSnapshot(tag, simulation, SimulationModels.RECAL, relitive_data_root)
-    gas_mass = snapshot.particle_read_sphere(ParticleType.gas, "Mass", centre_point, r200, UnitSystem.cgs).sum()
+    gas_masses = snapshot.particle_read_sphere(ParticleType.gas, "Mass", centre_point, r200, UnitSystem.cgs)
 
-    #stellar_mass = snapshot.particle_read_sphere(ParticleType.star, "Mass", centre_point, r200, UnitSystem.cgs).sum()
-    #black_hole_mass = snapshot.particle_read_sphere(ParticleType.black_hole, "Mass", centre_point, r200, UnitSystem.cgs).sum()
-    #dark_matter_mass = UnitSystem.convert_data(snapshot.header["MassTable"][ParticleType.dark_matter.value] * snapshot.header["NumPart_Total"][ParticleType.dark_matter.value], UnitSystem.h_less_comoving_GADGET, UnitSystem.cgs, cgs_conversion_factor = 10**10 / snapshot.hubble_paramiter)
-    
+    # Gas Fraction
+    #gas_mass = snapshot.particle_read_sphere(ParticleType.gas, "Mass", centre_point, r200, UnitSystem.cgs).sum()
+
+    # Circumgalactic Gas Fraction
+    star_formation_filter = snapshot.particle_read_sphere(ParticleType.gas, "StarFormationRate", centre_point, r200, UnitSystem.cgs) == 0.0
+    gas_mass = snapshot.particle_read_sphere(ParticleType.gas, "Mass", centre_point, r200, UnitSystem.cgs)[star_formation_filter].sum()
+
     return (snapshot.header["Omega0"] / snapshot.header["OmegaBaryon"]) * gas_mass / m_200
 
 produce_simulations_graph(func, "$f_{CGM}$ x $\Omega_0$ / $\Omega_b$", "Normalised Gas Mass Fraction", log_x = True)
