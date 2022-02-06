@@ -72,10 +72,8 @@ def DM_angular_momenta(selection_radius, halo, subhalo, tag, simulation):
     particle_velocities[:, 0] -= particle_velocities[:, 0].mean()
     particle_velocities[:, 1] -= particle_velocities[:, 1].mean()
     particle_velocities[:, 2] -= particle_velocities[:, 2].mean()
-    #particle_masses = snapshot.particle_read_sphere(ParticleType.dark_matter, "Mass", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs)
     particle_masses = np.full(particle_locations_box_adjusted.shape[0], snapshot.header["MassTable"][ParticleType.dark_matter.value] * 10**10 / snapshot.hubble_paramiter)
-    #particle_masses = UnitSystem.convert_data(snapshot.header["MassTable"][ParticleType.dark_matter.value] * snapshot.header["NumPart_Total"][ParticleType.dark_matter.value], UnitSystem.h_less_comoving_GADGET, UnitSystem.cgs, cgs_conversion_factor = 10**10 / snapshot.hubble_paramiter)
-
+    
     angular_momenta = np.cross(particle_locations_box_adjusted, particle_velocities) * particle_masses[:, None]
 
     # Calculate the net angular momentum
