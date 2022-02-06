@@ -27,3 +27,5 @@ class SimulationConstants(object):
             SimulationConstants.__simulation_constants = SimulationConstants()
             
         return SimulationConstants.__simulation_constants.__values.copy()
+
+#DARK_MATTER_PARTICLE_CGS_MASS = 
