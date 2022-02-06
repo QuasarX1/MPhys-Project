@@ -30,9 +30,7 @@ def barionic_angular_momenta_data(halo, subhalo, tag, simulation):
     for particle_type in particle_types:
         _, particle_locations_box_adjusted = snapshot.particle_read_sphere(particle_type, "Coordinates", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs, return_coordinates = True)
         particle_velocities = snapshot.particle_read_sphere(particle_type, "Velocity", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs)
-        particle_velocities[:, 0] -= particle_velocities[:, 0].mean()
-        particle_velocities[:, 1] -= particle_velocities[:, 1].mean()
-        particle_velocities[:, 2] -= particle_velocities[:, 2].mean()
+        particle_velocities -= particle_velocities.mean(axis = 0)
         particle_masses = snapshot.particle_read_sphere(particle_type, "Mass", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs)
 
         angular_momenta[particle_type] = np.sum(np.cross(particle_locations_box_adjusted, particle_velocities) * particle_masses[:, None], axis = 0)
@@ -69,9 +67,7 @@ def DM_angular_momenta(selection_radius, halo, subhalo, tag, simulation):
 
     _, particle_locations_box_adjusted = snapshot.particle_read_sphere(ParticleType.dark_matter, "Coordinates", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs, return_coordinates = True)
     particle_velocities = snapshot.particle_read_sphere(ParticleType.dark_matter, "Velocity", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs)
-    particle_velocities[:, 0] -= particle_velocities[:, 0].mean()
-    particle_velocities[:, 1] -= particle_velocities[:, 1].mean()
-    particle_velocities[:, 2] -= particle_velocities[:, 2].mean()
+    particle_velocities -= particle_velocities.mean(axis = 0)
     particle_masses = np.full(particle_locations_box_adjusted.shape[0], snapshot.header["MassTable"][ParticleType.dark_matter.value] * 10**10 / snapshot.hubble_paramiter)
     
     angular_momenta = np.cross(particle_locations_box_adjusted, particle_velocities) * particle_masses[:, None]

@@ -26,9 +26,7 @@ for i in range(len(simulations)):
     for j in range(len(particle_types)):
         _, particle_locations_box_adjusted = snapshot.particle_read_sphere(particle_types[j], "Coordinates", galaxy_centres[i], selection_radius, UnitSystem.cgs, UnitSystem.cgs, return_coordinates = True)
         particle_velocities = snapshot.particle_read_sphere(particle_types[j], "Velocity", galaxy_centres[i], selection_radius, UnitSystem.cgs, UnitSystem.cgs)
-        particle_velocities[:, 0] -= particle_velocities[:, 0].mean()
-        particle_velocities[:, 1] -= particle_velocities[:, 1].mean()
-        particle_velocities[:, 2] -= particle_velocities[:, 2].mean()
+        particle_velocities -= particle_velocities.mean(axis = 0)
         particle_masses = snapshot.particle_read_sphere(particle_types[j], "Mass", galaxy_centres[i], selection_radius, UnitSystem.cgs, UnitSystem.cgs)
 
         net_angular_momentum += np.sum(np.cross(particle_locations_box_adjusted, particle_velocities) * particle_masses[:, None], axis = 0)
