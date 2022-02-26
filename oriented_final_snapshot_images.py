@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from DataAccess import ParticleReadConversion_EagleSnapshot, load_catalouge_field, Simulations, SimulationModels, ParticleType, UnitSystem, constants
+from Physics import angular_momentum
 
 from assembily_history import physical_centeral_mass_positions, assembily_history
 from coordinate_transform import produce_disk_x_basis, transform_coordinates
@@ -26,10 +27,11 @@ for i in range(len(simulations)):
     for j in range(len(particle_types)):
         _, particle_locations_box_adjusted = snapshot.particle_read_sphere(particle_types[j], "Coordinates", galaxy_centres[i], selection_radius, UnitSystem.cgs, UnitSystem.cgs, return_coordinates = True)
         particle_velocities = snapshot.particle_read_sphere(particle_types[j], "Velocity", galaxy_centres[i], selection_radius, UnitSystem.cgs, UnitSystem.cgs)
-        particle_velocities -= particle_velocities.mean(axis = 0)
+        #particle_velocities -= particle_velocities.mean(axis = 0)
         particle_masses = snapshot.particle_read_sphere(particle_types[j], "Mass", galaxy_centres[i], selection_radius, UnitSystem.cgs, UnitSystem.cgs)
 
-        net_angular_momentum += np.sum(np.cross(particle_locations_box_adjusted, particle_velocities) * particle_masses[:, None], axis = 0)
+        #net_angular_momentum += np.sum(np.cross(particle_locations_box_adjusted, particle_velocities) * particle_masses[:, None], axis = 0)
+        net_angular_momentum += angular_momentum(particle_locations_box_adjusted, particle_velocities, particle_masses)
 
     rotation_axis_vector = net_angular_momentum / np.linalg.norm(net_angular_momentum, 2)
     rotation_plane_x_vector = produce_disk_x_basis(rotation_axis_vector)

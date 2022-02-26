@@ -36,10 +36,10 @@ def baryon_mass(halo, subhalo, tag, simulation):
 
 
 def produce_simulations_graph(func, y_axis_label, graph_title_partial, log_x = False, log_y = False):
-    mass_values = []
+    quantity_values = []
     snapshot_numbers = []
     for i, simulation in enumerate((Simulations.Early, Simulations.Organic, Simulations.Late)):
-        mass_values.append(np.empty(shape = (len(constants.tags), )))
+        quantity_values.append(np.empty(shape = (len(constants.tags), )))
         snapshot_numbers.append(np.array([float("{}.{}".format(tag[5:8], tag[9:12])) for tag in constants.tags]))
         for j, tag in enumerate(constants.tags):
             try:
@@ -48,19 +48,19 @@ def produce_simulations_graph(func, y_axis_label, graph_title_partial, log_x = F
                 if halo is None:
                     raise LookupError("No history avalible.")
 
-                mass_values[i][j] = func(halo, subhalo, tag, simulation)
+                quantity_values[i][j] = func(halo, subhalo, tag, simulation)
 
             except LookupError:
-                mass_values[i][j] = None
+                quantity_values[i][j] = None
             
-        array_filter = True ^ np.isnan(mass_values[i])
-        mass_values[i] = mass_values[i][array_filter]
+        array_filter = True ^ np.isnan(quantity_values[i])
+        quantity_values[i] = quantity_values[i][array_filter]
         snapshot_numbers[i] = snapshot_numbers[i][array_filter]
 
         
-    plt.plot(snapshot_numbers[0], mass_values[0], label = "Early")
-    plt.plot(snapshot_numbers[1], mass_values[1], label = "Organic")
-    plt.plot(snapshot_numbers[2], mass_values[2], label = "Late")
+    plt.plot(snapshot_numbers[0], quantity_values[0], label = "Early")
+    plt.plot(snapshot_numbers[1], quantity_values[1], label = "Organic")
+    plt.plot(snapshot_numbers[2], quantity_values[2], label = "Late")
     if log_x and log_y:
         plt.loglog()
     elif log_x:

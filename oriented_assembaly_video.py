@@ -5,6 +5,7 @@ import glob
 import cv2
 
 from DataAccess import constants, load_catalouge_field, ParticleReadConversion_EagleSnapshot, Simulations, SimulationModels, ParticleType, UnitSystem
+from Physics import angular_momentum
 
 from assembily_history import physical_centeral_mass_positions, assembily_history
 from coordinate_transform import produce_disk_x_basis, transform_coordinates
@@ -45,12 +46,13 @@ for i, simulation in enumerate(simulations):
             try:
                 _, particle_locations_box_adjusted = snapshot.particle_read_sphere(particle_type, "Coordinates", potential_centre, axis_calculation_selection_radius, UnitSystem.cgs, UnitSystem.cgs, return_coordinates = True)
                 particle_velocities = snapshot.particle_read_sphere(particle_type, "Velocity", potential_centre, axis_calculation_selection_radius, UnitSystem.cgs, UnitSystem.cgs)
-                particle_velocities -= particle_velocities.mean(axis = 0)
+                #particle_velocities -= particle_velocities.mean(axis = 0)
                 particle_masses = snapshot.particle_read_sphere(particle_type, "Mass", potential_centre, axis_calculation_selection_radius, UnitSystem.cgs, UnitSystem.cgs)
             except KeyError:
                 continue# No particles of this type avalible
 
-            net_angular_momentum += np.sum(np.cross(particle_locations_box_adjusted, particle_velocities) * particle_masses[:, None], axis = 0)
+            #net_angular_momentum += np.sum(np.cross(particle_locations_box_adjusted, particle_velocities) * particle_masses[:, None], axis = 0)
+            net_angular_momentum += angular_momentum(particle_locations_box_adjusted, particle_velocities, particle_masses)
 
         rotation_axis_vector = net_angular_momentum / np.linalg.norm(net_angular_momentum, 2)
         rotation_plane_x_vector = produce_disk_x_basis(rotation_axis_vector)
