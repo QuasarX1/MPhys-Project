@@ -182,6 +182,10 @@ def particle_specific_angular_momentum(target_particle_type, halo, subhalo, tag,
     return np.linalg.norm(barionic_specific_angular_momenta_data(halo, subhalo, tag, simulation, use_r200)[0][target_particle_type])
 
 
+def barionic_specific_angular_momentum(halo, subhalo, tag, simulation, use_r200 = False):
+    return np.linalg.norm(barionic_specific_angular_momenta_data(halo, subhalo, tag, simulation, use_r200)[1])
+
+
 
 #produce_simulations_graph(set_particle_type(angular_momentum_fraction, ParticleType.gas), "Fraction of Total Galactic $\\vec{L_{gas}}$", "Gaseous $\\vec{L}$ Fraction",
 #                          x_axis = X_Axis_Value.time, log_x = False, invert_x = False)
@@ -215,5 +219,15 @@ def particle_specific_angular_momentum(target_particle_type, halo, subhalo, tag,
 
 produce_simulations_graph(DM_halo_specific_angular_momentum, "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", "Dark Matter ($R_{200}$) Specific Angular Momentum",
                           x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False)
-produce_simulations_graph(DM_30kpc_specific_angular_momentum, "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", "Dark Matter (30 KPc) Specific Angular Momentum",
+produce_simulations_graph(DM_30kpc_specific_angular_momentum, "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", "Dark Matter (30 kPc) Specific Angular Momentum",
                           x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False)
+
+produce_simulations_graph(set_selection_radius(barionic_specific_angular_momentum, r200 = True), "|$\\vec{j_{b}}$| ($kPc$ $km$ $s^{-1}$)", "Barion ($R_{200}$) Specific Angular Momentum",
+                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = False, invert_x = False)
+produce_simulations_graph(set_selection_radius(barionic_specific_angular_momentum, r200 = False), "|$\\vec{j_{b}}$| ($kPc$ $km$ $s^{-1}$)", "Barion (30 kPc) Specific Angular Momentum",
+                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = False, invert_x = False)
+
+produce_single_simulation_graphs([DM_halo_specific_angular_momentum, set_selection_radius(barionic_specific_angular_momentum, r200 = True)], ["Dark Matter", "Barions"], y_axis_label = "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", graph_title_partial = "Specific Angular Momentum ($R_{200}$)",
+                                     x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False)
+produce_single_simulation_graphs([DM_30kpc_specific_angular_momentum, set_selection_radius(barionic_specific_angular_momentum, r200 = False)], ["Dark Matter", "Barions"], y_axis_label = "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", graph_title_partial = "Specific Angular Momentum (30 kPc)",
+                                     x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False)
