@@ -4,7 +4,7 @@ from DataAccess import constants, load_catalouge_field, ParticleReadConversion_E
 from Physics import angular_momentum, specific_angular_momentum
 
 from assembily_history import physical_centeral_mass_positions, assembily_history
-from data_over_time import produce_simulations_graph, produce_single_simulation_graphs
+from data_over_time import produce_simulations_graph, produce_single_simulation_graphs, X_Axis_Value
 
 relitive_data_root = ".\\gm_for_mphys"
 
@@ -183,23 +183,37 @@ def particle_specific_angular_momentum(target_particle_type, halo, subhalo, tag,
 
 
 
-#produce_simulations_graph(set_particle_type(angular_momentum_fraction, ParticleType.gas), "Fraction of Total Galactic $\\vec{L}$", "Gaseous $\\vec{L}$ Fraction", log_x = True)
-#produce_simulations_graph(set_particle_type(angular_momentum_fraction, ParticleType.star), "Fraction of Total Galactic $\\vec{L}$", "Stellar $\\vec{L}$ Fraction", log_x = True)
-#produce_single_simulation_graphs([set_particle_type(angular_momentum_fraction, ParticleType.gas), set_particle_type(angular_momentum_fraction, ParticleType.star)], ["Gas", "Star"], "Fraction of Total Galactic $\\vec{L}$", "$\\vec{L}$ Fraction", log_x = True)
+#produce_simulations_graph(set_particle_type(angular_momentum_fraction, ParticleType.gas), "Fraction of Total Galactic $\\vec{L_{gas}}$", "Gaseous $\\vec{L}$ Fraction",
+#                          x_axis = X_Axis_Value.time, log_x = False, invert_x = False)
+#produce_simulations_graph(set_particle_type(angular_momentum_fraction, ParticleType.star), "Fraction of Total Galactic $\\vec{L_*}$", "Stellar $\\vec{L}$ Fraction",
+#                          x_axis = X_Axis_Value.time, log_x = False, invert_x = False)
+#produce_single_simulation_graphs([set_particle_type(angular_momentum_fraction, ParticleType.gas), set_particle_type(angular_momentum_fraction, ParticleType.star)], ["Gas", "Star"], "Fraction of Total Galactic $\\vec{L}$", "$\\vec{L}$ Fraction",
+#                                 x_axis = X_Axis_Value.time, log_x = False, invert_x = False)
+#
+#produce_simulations_graph(gas_star_angular_momentum_angle, "$\\theta$ (Degrees)", "Gaseous-Stellar $\\vec{L}$ Angular Seperation",
+#                          x_axis = X_Axis_Value.time, log_x = False, invert_x = False)
+#
+#produce_simulations_graph(DM_halo_angular_momentum, "|$\\vec{L_{DM}}$| ($M_{sun}$ $kPc$ $km$ $s^{-1}$)", "Dark Matter ($R_{200}$) Angular Momentum",
+#                          x_axis = X_Axis_Value.time, log_x = False, invert_x = False)
+#produce_simulations_graph(DM_30kpc_angular_momentum, "|$\\vec{L_{DM}}$| ($M_{sun}$ $kPc$ $km$ $s^{-1}$)", "Dark Matter (30 KPc) Angular Momentum",
+#                          x_axis = X_Axis_Value.time, log_x = False, invert_x = False)
 
-#produce_simulations_graph(gas_star_angular_momentum_angle, "$\\theta$ (Degrees)", "Gaseous-Stellar $\\vec{L}$ Angular Seperation", log_x = True)
 
-#produce_simulations_graph(DM_halo_angular_momentum, "|$\\vec{L}$| ($M_{sun}$ $kPc$ $km$ $s^{-1}$)", "Dark Matter ($R_{200}$) Angular Momentum", log_x = True)
-#produce_simulations_graph(DM_30kpc_angular_momentum, "|$\\vec{L}$| ($M_{sun}$ $kPc$ $km$ $s^{-1}$)", "Dark Matter (30 KPc) Angular Momentum", log_x = True)
+#produce_simulations_graph(set_selection_radius(set_particle_type(particle_specific_angular_momentum, ParticleType.star), r200 = True), "Galactic |$\\vec{j_*}$| ($kPc$ $km$ $s^{-1}$)", "Stellar Specific Angular Momentum inside $R_{200}$",
+#                          x_axis = X_Axis_Value.time, log_x = False, invert_x = False)
+#produce_simulations_graph(set_selection_radius(set_particle_type(particle_specific_angular_momentum, ParticleType.gas), r200 = True), "Galactic |$\\vec{j_{gas}}$| ($kPc$ $km$ $s^{-1}$)", "Gaseous Specific Angular Momentum inside $R_{200}$",
+#                          x_axis = X_Axis_Value.time, log_x = False, invert_x = False)
+#produce_simulations_graph(set_selection_radius(set_particle_type(particle_specific_angular_momentum, ParticleType.black_hole), r200 = True), "Galactic |$\\vec{j_{BH}}$| ($kPc$ $km$ $s^{-1}$)", "Black Hole Specific Angular Momentum inside $R_{200}$",
+#                          x_axis = X_Axis_Value.time, log_x = False, invert_x = False)
 
+#produce_simulations_graph(set_particle_type(specific_angular_momentum_fraction, ParticleType.gas), "Fraction of Total Galactic $\\vec{j_{gas}}$", "Gaseous $\\vec{j}$ Fraction",
+#                          x_axis = X_Axis_Value.time, log_x = False, invert_x = False)
+#produce_simulations_graph(set_particle_type(specific_angular_momentum_fraction, ParticleType.star), "Fraction of Total Galactic $\\vec{j_*}$", "Stellar $\\vec{j}$ Fraction",
+#                          x_axis = X_Axis_Value.time, log_x = False, invert_x = False)
+#produce_single_simulation_graphs([set_particle_type(specific_angular_momentum_fraction, ParticleType.gas), set_particle_type(specific_angular_momentum_fraction, ParticleType.star)], ["Gas", "Star"], "Fraction of Total Galactic $\\vec{j}$", "$\\vec{j}$ Fraction",
+#                                 x_axis = X_Axis_Value.time, log_x = False, invert_x = False)
 
-produce_simulations_graph(set_selection_radius(set_particle_type(particle_specific_angular_momentum, ParticleType.star), r200 = True), "Galactic |$\\vec{j_*}$| ($kPc$ $km$ $s^{-1}$)", "Stellar Specific Angular Momentum inside $R_{200}$", log_x = True)
-produce_simulations_graph(set_selection_radius(set_particle_type(particle_specific_angular_momentum, ParticleType.gas), r200 = True), "Galactic |$\\vec{j_*}$| ($kPc$ $km$ $s^{-1}$)", "Gaseous Specific Angular Momentum inside $R_{200}$", log_x = True)
-produce_simulations_graph(set_selection_radius(set_particle_type(particle_specific_angular_momentum, ParticleType.black_hole), r200 = True), "Galactic |$\\vec{j_*}$| ($kPc$ $km$ $s^{-1}$)", "Black Hole Specific Angular Momentum inside $R_{200}$", log_x = True)
-
-#produce_simulations_graph(set_particle_type(specific_angular_momentum_fraction, ParticleType.gas), "Fraction of Total Galactic $\\vec{j}$", "Gaseous $\\vec{j}$ Fraction", log_x = True)
-#produce_simulations_graph(set_particle_type(specific_angular_momentum_fraction, ParticleType.star), "Fraction of Total Galactic $\\vec{j}$", "Stellar $\\vec{j}$ Fraction", log_x = True)
-#produce_single_simulation_graphs([set_particle_type(specific_angular_momentum_fraction, ParticleType.gas), set_particle_type(specific_angular_momentum_fraction, ParticleType.star)], ["Gas", "Star"], "Fraction of Total Galactic $\\vec{j}$", "$\\vec{j}$ Fraction", log_x = True)
-
-produce_simulations_graph(DM_halo_specific_angular_momentum, "|$\\vec{j}$| ($kPc$ $km$ $s^{-1}$)", "Dark Matter ($R_{200}$) Specific Angular Momentum", log_x = True)
-produce_simulations_graph(DM_30kpc_specific_angular_momentum, "|$\\vec{j}$| ($kPc$ $km$ $s^{-1}$)", "Dark Matter (30 KPc) Specific Angular Momentum", log_x = True)
+produce_simulations_graph(DM_halo_specific_angular_momentum, "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", "Dark Matter ($R_{200}$) Specific Angular Momentum",
+                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False)
+produce_simulations_graph(DM_30kpc_specific_angular_momentum, "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", "Dark Matter (30 KPc) Specific Angular Momentum",
+                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False)

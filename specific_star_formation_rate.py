@@ -1,6 +1,6 @@
 from DataAccess import constants, load_catalouge_field, Simulations, SimulationModels, ParticleType, UnitSystem
 
-from data_over_time import produce_simulations_graph
+from data_over_time import produce_simulations_graph, X_Axis_Value
 
 relitive_data_root = ".\\gm_for_mphys"
 
@@ -16,4 +16,5 @@ def func(halo, subhalo, tag, simulation):
 
     return star_formation_rate / stellar_mass
 
-produce_simulations_graph(func, "sSFR ($yr^{-1}$)", "Specific Star Formation Rate", log_x = True, log_y = True)
+produce_simulations_graph(func, "sSFR ($yr^{-1}$)", "Specific Star Formation Rate",
+                          x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False)

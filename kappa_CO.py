@@ -4,7 +4,7 @@ from DataAccess import constants, load_catalouge_field, ParticleReadConversion_E
 from Physics import angular_momentum, angular_momenta as calculate_individual_momenta, kappa_CO
 
 from assembily_history import physical_centeral_mass_positions, assembily_history
-from data_over_time import produce_simulations_graph
+from data_over_time import produce_simulations_graph, X_Axis_Value
 from coordinate_transform import produce_disk_x_basis, transform_coordinates
 
 relitive_data_root = ".\\gm_for_mphys"
@@ -58,5 +58,7 @@ def func(halo, subhalo, tag, simulation):
     return kappa_CO(star_particle_locations_box_adjusted, star_particle_velocities, star_particle_masses)
 
 if __name__ == "__main__":
-    produce_simulations_graph(func, "$\kappa_{CO}$", "Co-Rotating Stellar Kinetic Energy Fraction", log_x = True)
+    produce_simulations_graph(func, "$\kappa_{CO}$", "Co-Rotating Stellar Kinetic Energy Fraction",
+                              x_axis = X_Axis_Value.time, log_x = False, invert_x = False)
+#                              x_axis = X_Axis_Value.redshift, log_x = True, invert_x = True)
 

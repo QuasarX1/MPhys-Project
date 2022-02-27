@@ -1,6 +1,6 @@
 from DataAccess import constants, load_catalouge_field, ParticleReadConversion_EagleSnapshot, particles_by_group, Simulations, SimulationModels, ParticleType, UnitSystem
 
-from data_over_time import produce_simulations_graph
+from data_over_time import produce_simulations_graph, X_Axis_Value
 
 relitive_data_root = ".\\gm_for_mphys"
 
@@ -28,4 +28,5 @@ def func(halo, subhalo, tag, simulation):
 
     return (snapshot.header["Omega0"] / snapshot.header["OmegaBaryon"]) * gas_mass / m_200
 
-produce_simulations_graph(func, "$f_{CGM}$ x $\Omega_0$ / $\Omega_b$", "Normalised Gas Mass Fraction", log_x = True)
+produce_simulations_graph(func, "$f_{CGM}$ x $\Omega_0$ / $\Omega_b$", "Normalised Gas Mass Fraction",
+                          x_axis = X_Axis_Value.time, log_x = False, invert_x = False)

@@ -11,6 +11,16 @@ tags = ("000_z020p000", "001_z015p132", "002_z009p993",
         "024_z000p366", "025_z000p271", "026_z000p183",
         "027_z000p101", "028_z000p000")
 
+times = {}
+for tag in tags:
+    with h5.File(f"./gm_for_mphys/RECAL/Organic/groups_{tag}/eagle_subfind_tab_{tag}.0.hdf5", "r") as datafile:
+        times[tag] = datafile["Header"].attrs["Time"]
+
+expansion_factors = {}
+for tag in tags:
+    with h5.File(f"./gm_for_mphys/RECAL/Organic/groups_{tag}/eagle_subfind_tab_{tag}.0.hdf5", "r") as datafile:
+        expansion_factors[tag] = datafile["Header"].attrs["ExpansionFactor"]
+
 class SimulationConstants(object):
     __simulation_constants = None
 
