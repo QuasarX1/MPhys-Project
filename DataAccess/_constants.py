@@ -1,5 +1,9 @@
 import h5py as h5
 
+import sys
+sys.path.append("../")
+from Physics import time_from_redshift
+
 tags = ("000_z020p000", "001_z015p132", "002_z009p993",
         "003_z008p988", "004_z008p075", "005_z007p050",
         "006_z005p971", "007_z005p487", "008_z005p037",
@@ -11,15 +15,7 @@ tags = ("000_z020p000", "001_z015p132", "002_z009p993",
         "024_z000p366", "025_z000p271", "026_z000p183",
         "027_z000p101", "028_z000p000")
 
-times = {}
-for tag in tags:
-    with h5.File(f"./gm_for_mphys/RECAL/Organic/groups_{tag}/eagle_subfind_tab_{tag}.0.hdf5", "r") as datafile:
-        times[tag] = datafile["Header"].attrs["Time"]
 
-expansion_factors = {}
-for tag in tags:
-    with h5.File(f"./gm_for_mphys/RECAL/Organic/groups_{tag}/eagle_subfind_tab_{tag}.0.hdf5", "r") as datafile:
-        expansion_factors[tag] = datafile["Header"].attrs["ExpansionFactor"]
 
 class SimulationConstants(object):
     __simulation_constants = None
@@ -37,5 +33,23 @@ class SimulationConstants(object):
             SimulationConstants.__simulation_constants = SimulationConstants()
             
         return SimulationConstants.__simulation_constants.__values.copy()
+
+
+
+times = {}
+for tag in tags:
+    with h5.File(f"./gm_for_mphys/RECAL/Organic/groups_{tag}/eagle_subfind_tab_{tag}.0.hdf5", "r") as datafile:
+        #times[tag] = datafile["Header"].attrs["Time"] * 3.085678 * 10**19 / SimulationConstants.get_constants()["SEC_PER_MEGAYEAR"] / 1000
+        times[tag] = time_from_redshift(datafile["Header"].attrs["Redshift"], datafile["Header"].attrs["Omega0"], datafile["Header"].attrs["OmegaLambda"], datafile["Header"].attrs["HubbleParam"])
+        #TODO: this dosen't give Gyrs - max value is just under 1000 (at redshift z=0)
+
+
+
+expansion_factors = {}
+for tag in tags:
+    with h5.File(f"./gm_for_mphys/RECAL/Organic/groups_{tag}/eagle_subfind_tab_{tag}.0.hdf5", "r") as datafile:
+        expansion_factors[tag] = datafile["Header"].attrs["ExpansionFactor"]
+
+
 
 #DARK_MATTER_PARTICLE_CGS_MASS = 
