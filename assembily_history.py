@@ -104,8 +104,10 @@ assembily_history = {
 
 physical_centeral_mass_positions = {}
 for i, simulation in enumerate((Simulations.Early, Simulations.Organic, Simulations.Late)):
+#for i, simulation in enumerate((Simulations.Organic, )):#TODO: enable to only use organic
     physical_centeral_mass_positions[simulation] = {}
     for tag in constants.tags:
+#    for tag in (constants.tags[-1], ):#TODO: enable to only use z=0
         try:
             halo = assembily_history[Simulations.Early][tag]["halo"]
             subhalo = assembily_history[Simulations.Early][tag]["subhalo"]

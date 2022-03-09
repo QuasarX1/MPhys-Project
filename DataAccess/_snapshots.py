@@ -153,7 +153,7 @@ class ParticleReadConversion_EagleSnapshot(pyread_eagle.EagleSnapshot):
             # Recast the data to float64 to be safe
             if unit_system == UnitSystem.cgs:
                 particle_coordiantes = np.array(particle_coordiantes, dtype = np.float64)
-            particle_coordiantes = UnitSystem.convert_data(particle_coordiantes, UnitSystem.h_less_comoving_GADGET, unit_system, self.hubble_paramiter, h_scale_exponent, self.expansion_factor, a_scale_exponent, cgs_conversion_factor)
+            particle_coordiantes = UnitSystem.convert_data(particle_coordiantes, UnitSystem.h_less_comoving_GADGET, unit_system, self.hubble_paramiter, self.h_scale_exponent_values[particle_type]["Coordinates"], self.expansion_factor, self.a_scale_exponent_values[particle_type]["Coordinates"], self.cgs_conversion_factor_values[particle_type]["Coordinates"])
 
 
         if not return_coordinates:
@@ -242,7 +242,7 @@ class ParticleReadConversion_EagleSnapshot(pyread_eagle.EagleSnapshot):
             # Recast the data to float64 to be safe
             if unit_system == UnitSystem.cgs:
                 coordinates = np.array(coordinates, dtype = np.float64)
-            coordinates = UnitSystem.convert_data(coordinates, UnitSystem.h_less_comoving_GADGET, unit_system, self.hubble_paramiter, h_scale_exponent, self.expansion_factor, a_scale_exponent, cgs_conversion_factor)
+            coordinates = UnitSystem.convert_data(coordinates, UnitSystem.h_less_comoving_GADGET, unit_system, self.hubble_paramiter, self.h_scale_exponent_values[particle_type]["Coordinates"], self.expansion_factor, self.a_scale_exponent_values[particle_type]["Coordinates"], self.cgs_conversion_factor_values[particle_type]["Coordinates"])
 
 
         if not return_coordinates:

@@ -26,14 +26,14 @@ def angular_momentum_units(value):
     """
     g cm^2 s^-1 -> M_sun kPc km s^-1
     """
-    return UnitSystem.convert_mass_to_solar(value) * 10**(-1) / constants.SimulationConstants.get_constants()["CM_PER_MPC"]
+    return UnitSystem.convert_mass_to_solar(value) * 10**(-2) / constants.SimulationConstants.get_constants()["CM_PER_MPC"]
 
 
 def specific_angular_momentum_units(value):
     """
     cm^2 s^-1 -> kPc km s^-1
     """
-    return value * 10**(-1) / constants.SimulationConstants.get_constants()["CM_PER_MPC"]
+    return value * 10**(-2) / constants.SimulationConstants.get_constants()["CM_PER_MPC"]
 
 
 def barionic_angular_momenta_data(halo, subhalo, tag, simulation, use_r200 = False):
@@ -80,15 +80,17 @@ def barionic_specific_angular_momenta_data(halo, subhalo, tag, simulation, use_r
     particle_types = (ParticleType.gas, ParticleType.star, ParticleType.black_hole)
     net_specific_angular_momentum = np.array([0, 0, 0], dtype = np.float64)
     specific_angular_momenta = {particle_type:np.array([0, 0, 0], dtype = np.float64) for particle_type in particle_types}
+    total_N_particles = 0
     for particle_type in particle_types:
         # Read data
-        _, particle_locations_box_adjusted = snapshot.particle_read_sphere(particle_type, "Coordinates", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs, return_coordinates = True)
-        particle_velocities = snapshot.particle_read_sphere(particle_type, "Velocity", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs)
+        #_, particle_locations_box_adjusted = snapshot.particle_read_sphere(particle_type, "Coordinates", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs, return_coordinates = True)
+        particle_velocities, particle_locations_box_adjusted = snapshot.particle_read_sphere(particle_type, "Velocity", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs, return_coordinates = True)
         
-        specific_angular_momenta[particle_type] = specific_angular_momentum(particle_locations_box_adjusted, particle_velocities)
-        net_specific_angular_momentum += specific_angular_momenta[particle_type]
+        specific_angular_momenta[particle_type] = specific_angular_momentum(particle_locations_box_adjusted, particle_velocities) / len(particle_locations_box_adjusted)
+        net_specific_angular_momentum += specific_angular_momenta[particle_type] * len(particle_locations_box_adjusted)
+        total_N_particles += len(particle_locations_box_adjusted)
 
-    return specific_angular_momenta, net_specific_angular_momentum
+    return specific_angular_momenta, net_specific_angular_momentum / total_N_particles
 
 
 def angular_momentum_fraction(target_particle_type, halo, subhalo, tag, simulation):
@@ -141,7 +143,12 @@ def DM_angular_momentum(selection_radius, halo, subhalo, tag, simulation):
     particle_masses = np.full(particle_locations_box_adjusted.shape[0], UnitSystem.convert_mass_from_solar(snapshot.header["MassTable"][ParticleType.dark_matter.value] * 10**10 / snapshot.hubble_paramiter))
     
     # Calculate the net angular momentum
-    return angular_momentum(particle_locations_box_adjusted, particle_velocities, particle_masses)
+    L_net = angular_momentum(particle_locations_box_adjusted, particle_velocities, particle_masses)
+
+    # Calculate the mean angular momentum
+    L_mean = L_net / len(particle_locations_box_adjusted)
+
+    return L_mean
 
 
 def DM_halo_angular_momentum(halo, subhalo, tag, simulation):
@@ -160,12 +167,16 @@ def DM_specific_angular_momentum(selection_radius, halo, subhalo, tag, simulatio
         raise LookupError("No data avalible.")
 
     snapshot = ParticleReadConversion_EagleSnapshot(tag, simulation, SimulationModels.RECAL, relitive_data_root)
-
-    _, particle_locations_box_adjusted = snapshot.particle_read_sphere(ParticleType.dark_matter, "Coordinates", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs, return_coordinates = True)
-    particle_velocities = snapshot.particle_read_sphere(ParticleType.dark_matter, "Velocity", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs)
     
-    # Calculate the net angular momentum
-    return specific_angular_momentum(particle_locations_box_adjusted, particle_velocities)
+    absolute_particle_velocities, relitive_particle_locations = snapshot.particle_read_sphere(ParticleType.dark_matter, "Velocity", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs, return_coordinates = True)
+    
+    # Calculate the net specific angular momentum
+    j_net = specific_angular_momentum(relitive_particle_locations, absolute_particle_velocities)
+
+    # Calculate the per-particle specific angular momentum
+    j_mean = j_net / len(relitive_particle_locations)
+
+    return j_mean
 
 
 def DM_halo_specific_angular_momentum(halo, subhalo, tag, simulation):
@@ -179,11 +190,18 @@ def DM_30kpc_specific_angular_momentum(halo, subhalo, tag, simulation):
 
 
 def particle_specific_angular_momentum(target_particle_type, halo, subhalo, tag, simulation, use_r200 = False):
-    return np.linalg.norm(barionic_specific_angular_momenta_data(halo, subhalo, tag, simulation, use_r200)[0][target_particle_type])
+    return specific_angular_momentum_units(np.linalg.norm(barionic_specific_angular_momenta_data(halo, subhalo, tag, simulation, use_r200)[0][target_particle_type]))
 
 
 def barionic_specific_angular_momentum(halo, subhalo, tag, simulation, use_r200 = False):
-    return np.linalg.norm(barionic_specific_angular_momenta_data(halo, subhalo, tag, simulation, use_r200)[1])
+    return specific_angular_momentum_units(np.linalg.norm(barionic_specific_angular_momenta_data(halo, subhalo, tag, simulation, use_r200)[1]))
+
+
+
+#x = DM_halo_specific_angular_momentum(1, 0, "028_z000p000", Simulations.Organic)
+#exit()
+
+
 
 
 
@@ -217,17 +235,23 @@ def barionic_specific_angular_momentum(halo, subhalo, tag, simulation, use_r200 
 #produce_single_simulation_graphs([set_particle_type(specific_angular_momentum_fraction, ParticleType.gas), set_particle_type(specific_angular_momentum_fraction, ParticleType.star)], ["Gas", "Star"], "Fraction of Total Galactic $\\vec{j}$", "$\\vec{j}$ Fraction",
 #                                 x_axis = X_Axis_Value.time, log_x = False, invert_x = False)
 
+from matplotlib import pyplot as plt
+def alpha_exp_line(x_values, *args, **kwargs):
+    plt.plot(x_values[1][-5:], kwargs["expansion_factor_values"][1][-5:]**(3/2) * 10**1, label = "j $\\propto$ $\\alpha^{3/2}$")
+    plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(9/2) * 10**7, label = "j $\\propto$ $\\alpha^{9/2}$")
+
+
 produce_simulations_graph(DM_halo_specific_angular_momentum, "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", "Dark Matter ($R_{200}$) Specific Angular Momentum",
-                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False)
+                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = True, extra_plotting_func = alpha_exp_line)
 produce_simulations_graph(DM_30kpc_specific_angular_momentum, "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", "Dark Matter (30 kPc) Specific Angular Momentum",
-                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False)
+                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = True, extra_plotting_func = alpha_exp_line)
 
 produce_simulations_graph(set_selection_radius(barionic_specific_angular_momentum, r200 = True), "|$\\vec{j_{b}}$| ($kPc$ $km$ $s^{-1}$)", "Barion ($R_{200}$) Specific Angular Momentum",
-                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = False, invert_x = False)
+                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = True, extra_plotting_func = alpha_exp_line)
 produce_simulations_graph(set_selection_radius(barionic_specific_angular_momentum, r200 = False), "|$\\vec{j_{b}}$| ($kPc$ $km$ $s^{-1}$)", "Barion (30 kPc) Specific Angular Momentum",
-                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = False, invert_x = False)
+                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = True, extra_plotting_func = alpha_exp_line)
 
 produce_single_simulation_graphs([DM_halo_specific_angular_momentum, set_selection_radius(barionic_specific_angular_momentum, r200 = True)], ["Dark Matter", "Barions"], y_axis_label = "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", graph_title_partial = "Specific Angular Momentum ($R_{200}$)",
-                                     x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False)
+                                     x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = True)
 produce_single_simulation_graphs([DM_30kpc_specific_angular_momentum, set_selection_radius(barionic_specific_angular_momentum, r200 = False)], ["Dark Matter", "Barions"], y_axis_label = "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", graph_title_partial = "Specific Angular Momentum (30 kPc)",
-                                     x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False)
+                                     x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = True)

@@ -41,7 +41,7 @@ class X_Axis_Value(Enum):
     time = 1
     expansion_factor = 2
 
-def produce_simulations_graph(func, y_axis_label, graph_title_partial, x_axis: X_Axis_Value = X_Axis_Value.redshift, log_x = True, log_y = False, invert_x = True, invert_y = False, xlim_overide = (None, None), ylim_overide = (None, None)):
+def produce_simulations_graph(func, y_axis_label, graph_title_partial, x_axis: X_Axis_Value = X_Axis_Value.redshift, log_x = True, log_y = False, invert_x = True, invert_y = False, xlim_overide = (None, None), ylim_overide = (None, None), use_rolling_average = False, extra_plotting_func = None):
     quantity_values = []
     redshift_values = []
     time_values = []
@@ -83,10 +83,17 @@ def produce_simulations_graph(func, y_axis_label, graph_title_partial, x_axis: X
         plt.xlabel("Expansion Factor")
     else:
         raise ValueError("Value of \"x_axis\" was not from the \"X_Axis_Value\" enum.")
+    
+    if use_rolling_average:
+        for data_set_index in range(len(x_values)):
+            x_values[data_set_index] = x_values[data_set_index][2:]
+            quantity_values[data_set_index] = (quantity_values[data_set_index][:-2] + quantity_values[data_set_index][1:-1] + quantity_values[data_set_index][2:]) / 3
 
     plt.plot(x_values[0], quantity_values[0], label = "Early")
     plt.plot(x_values[1], quantity_values[1], label = "Organic")
     plt.plot(x_values[2], quantity_values[2], label = "Late")
+    if extra_plotting_func is not None:
+        extra_plotting_func(x_values, redshift_values = redshift_values, time_values = time_values, expansion_factor_values = expansion_factor_values)
 
     # Set axis log status
     if log_x and log_y:
@@ -118,7 +125,7 @@ def produce_simulations_graph(func, y_axis_label, graph_title_partial, x_axis: X
     plt.legend()
     plt.show()
 
-def produce_single_simulation_graphs(funcs, quantity_labels, y_axis_label, graph_title_partial, x_axis: X_Axis_Value = X_Axis_Value.redshift, log_x = True, log_y = False, invert_x = True, invert_y = False, xlim_overide = (None, None), ylim_overide = (None, None)):
+def produce_single_simulation_graphs(funcs, quantity_labels, y_axis_label, graph_title_partial, x_axis: X_Axis_Value = X_Axis_Value.redshift, log_x = True, log_y = False, invert_x = True, invert_y = False, xlim_overide = (None, None), ylim_overide = (None, None), use_rolling_average = False):
     fig, axes = plt.subplots(1, 3)
 
     for simulation_number, simulation in enumerate((Simulations.Early, Simulations.Organic, Simulations.Late)):
@@ -169,6 +176,10 @@ def produce_single_simulation_graphs(funcs, quantity_labels, y_axis_label, graph
                 axes[simulation_number].set_xlabel("Expansion Factor")
             else:
                 raise ValueError("Value of \"x_axis\" was not from the \"X_Axis_Value\" enum.")
+
+            if use_rolling_average:
+                x_values[i] = x_values[i][2:]
+                quantity_values[i] = (quantity_values[i][:-2] + quantity_values[i][1:-1] + quantity_values[i][2:]) / 3
         
             axes[simulation_number].plot(x_values[i], quantity_values[i], label = quantity_labels[i])
 
