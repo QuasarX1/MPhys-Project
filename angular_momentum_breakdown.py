@@ -237,7 +237,7 @@ def barionic_specific_angular_momentum(halo, subhalo, tag, simulation, use_r200 
 
 from matplotlib import pyplot as plt
 def alpha_exp_line(x_values, *args, **kwargs):
-    plt.plot(x_values[1][-5:], kwargs["expansion_factor_values"][1][-5:]**(3/2) * 10**1, label = "j $\\propto$ $\\alpha^{3/2}$")
+    plt.plot(x_values[1][-6:], kwargs["expansion_factor_values"][1][-6:]**(3/2) * 10**1, label = "j $\\propto$ $\\alpha^{3/2}$")
     plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(9/2) * 10**7, label = "j $\\propto$ $\\alpha^{9/2}$")
 
 
