@@ -49,7 +49,3 @@ expansion_factors = {}
 for tag in tags:
     with h5.File(f"./gm_for_mphys/RECAL/Organic/groups_{tag}/eagle_subfind_tab_{tag}.0.hdf5", "r") as datafile:
         expansion_factors[tag] = datafile["Header"].attrs["ExpansionFactor"]
-
-
-
-#DARK_MATTER_PARTICLE_CGS_MASS = 
