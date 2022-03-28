@@ -213,31 +213,40 @@ def produce_single_simulation_graphs(funcs, quantity_labels, y_axis_label, graph
         #axes[simulation_number].title(f"{simulation_name} {graph_title_partial} for each Snapshot")
         axes[simulation_number].set_title(f"{simulation_name}")
         axes[simulation_number].legend()
+
+    if invert_y:
+        min_y_limit = max([axes[simulation_number].get_ylim()[0] for simulation_number in range(len((Simulations.Early, Simulations.Organic, Simulations.Late)))])
+        max_y_limit = min([axes[simulation_number].get_ylim()[1] for simulation_number in range(len((Simulations.Early, Simulations.Organic, Simulations.Late)))])
+    else:
+        min_y_limit = min([axes[simulation_number].get_ylim()[0] for simulation_number in range(len((Simulations.Early, Simulations.Organic, Simulations.Late)))])
+        max_y_limit = max([axes[simulation_number].get_ylim()[1] for simulation_number in range(len((Simulations.Early, Simulations.Organic, Simulations.Late)))])
+    for simulation_number in range(len((Simulations.Early, Simulations.Organic, Simulations.Late))):
+        axes[simulation_number].set_ylim(min_y_limit, max_y_limit)
     plt.suptitle(f"{graph_title_partial} over Time")
     plt.show()
 
 
 
 if __name__ == "__main__":
-    # M_200 (r = R_200)
-    produce_simulations_graph(total_mass_M200, y_axis_label = "$M_{200}$ ($M_{sun}$)", graph_title_partial = "Group_M_Crit200",
-                              x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False, ylim_overide = (10**10, None))
-    
-    # M* (r = 30KPc)
-    produce_simulations_graph(stellar_mass, y_axis_label = "$M_*$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Stellar Mass",
-                              x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False, ylim_overide = (10**6, None))
-    
-    # M_BH (r = 30KPc)
-    produce_simulations_graph(black_hole_mass, y_axis_label = "$M_{BH}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Black Hole Mass",
-                              x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False, ylim_overide = (10**5, None))
-    
-    # M_DM (r = 30KPc)
-    produce_simulations_graph(dark_matter_mass, y_axis_label = "$M_{DM}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Dark Matter Mass",
-                              x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False)
-    
-    # Barionic Mass (r = 30KPc)
-    produce_simulations_graph(baryon_mass, y_axis_label = "$M_{Baryonic}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Baryonic Mass",
-                              x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False)
+    ## M_200 (r = R_200)
+    #produce_simulations_graph(total_mass_M200, y_axis_label = "$M_{200}$ ($M_{sun}$)", graph_title_partial = "Group_M_Crit200",
+    #                          x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False, ylim_overide = (10**10, None))
+    #
+    ## M* (r = 30KPc)
+    #produce_simulations_graph(stellar_mass, y_axis_label = "$M_*$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Stellar Mass",
+    #                          x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False, ylim_overide = (10**6, None))
+    #
+    ## M_BH (r = 30KPc)
+    #produce_simulations_graph(black_hole_mass, y_axis_label = "$M_{BH}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Black Hole Mass",
+    #                          x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False, ylim_overide = (10**5, None))
+    #
+    ## M_DM (r = 30KPc)
+    #produce_simulations_graph(dark_matter_mass, y_axis_label = "$M_{DM}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Dark Matter Mass",
+    #                          x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False)
+    #
+    ## Barionic Mass (r = 30KPc)
+    #produce_simulations_graph(baryon_mass, y_axis_label = "$M_{Baryonic}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Baryonic Mass",
+    #                          x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False)
     
     # Mass Brakedown (r = 30KPc)
     produce_single_simulation_graphs([dark_matter_mass, gas_mass, stellar_mass, black_hole_mass], ["Dark Matter", "Gas", "Stars", "Black Holes"], y_axis_label = "Mass ($M_{sun}$)", graph_title_partial = "Central Subhalo Mass Brakedown (r = 30 kPc)",
