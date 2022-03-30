@@ -40,6 +40,10 @@ class X_Axis_Value(Enum):
     redshift = 0
     time = 1
     expansion_factor = 2
+    
+#line_colours = ("#009E73", "#000000", "#CC79A7", "#D55E00", "#56B4E9", "#0072B2", "#F0E442", "#E69F00")
+line_colours = ("#CC6677", "#332288", "#117733", "#882255", "#44AA99", "#DDCC77")
+line_styles = ("-", "-.", "--", ":")
 
 def produce_simulations_graph(func, y_axis_label, graph_title_partial, x_axis: X_Axis_Value = X_Axis_Value.redshift, log_x = True, log_y = False, invert_x = True, invert_y = False, xlim_overide = (None, None), ylim_overide = (None, None), use_rolling_average = False, extra_plotting_func = None):
     quantity_values = []
@@ -89,9 +93,9 @@ def produce_simulations_graph(func, y_axis_label, graph_title_partial, x_axis: X
             x_values[data_set_index] = x_values[data_set_index][2:]
             quantity_values[data_set_index] = (quantity_values[data_set_index][:-2] + quantity_values[data_set_index][1:-1] + quantity_values[data_set_index][2:]) / 3
 
-    plt.plot(x_values[0], quantity_values[0], label = "Early")
-    plt.plot(x_values[1], quantity_values[1], label = "Organic")
-    plt.plot(x_values[2], quantity_values[2], label = "Late")
+    plt.plot(x_values[0], quantity_values[0], label = "Early", color = line_colours[0], linestyle = line_styles[1])
+    plt.plot(x_values[1], quantity_values[1], label = "Organic", color = line_colours[1])
+    plt.plot(x_values[2], quantity_values[2], label = "Late", color = line_colours[2], linestyle = line_styles[2])
     if extra_plotting_func is not None:
         extra_plotting_func(x_values, redshift_values = redshift_values, time_values = time_values, expansion_factor_values = expansion_factor_values)
 
@@ -181,7 +185,7 @@ def produce_single_simulation_graphs(funcs, quantity_labels, y_axis_label, graph
                 x_values[i] = x_values[i][2:]
                 quantity_values[i] = (quantity_values[i][:-2] + quantity_values[i][1:-1] + quantity_values[i][2:]) / 3
         
-            axes[simulation_number].plot(x_values[i], quantity_values[i], label = quantity_labels[i])
+            axes[simulation_number].plot(x_values[i], quantity_values[i], label = quantity_labels[i], color = line_colours[(3 + i) % len(line_colours)], linestyle = line_styles[i % len(line_styles)])
 
         # Set axis log status
         if log_x and log_y:

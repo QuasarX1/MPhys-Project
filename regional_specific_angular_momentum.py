@@ -3,14 +3,13 @@ from matplotlib import pyplot as plt
 from DataAccess import constants, load_catalouge_field, ParticleReadConversion_EagleSnapshot, particles_by_group, Simulations, SimulationModels, ParticleType, all_particle_types, barionic_particle_types, barionic_low_mass_particle_types, UnitSystem
 from assembily_history import physical_centeral_mass_positions, assembily_history
 from z0_particle_IDs import load_particle_IDs
-from data_over_time import produce_simulations_graph, produce_single_simulation_graphs, X_Axis_Value
+from data_over_time import produce_simulations_graph, produce_single_simulation_graphs, X_Axis_Value, line_colours, line_styles
 from Physics import specific_angular_momentum, centre_of_mass
 from angular_momentum_units import specific_angular_momentum_units
-#TODO: try normalising by value of R_200?????
 
 relitive_data_root = ".\\gm_for_mphys"
 
-R_200_fraction = 1.0
+#R_200_fraction = 1.0
 #R_200_fraction = 0.1
 
 def set_particle_types(func, *particle_types):
@@ -18,7 +17,12 @@ def set_particle_types(func, *particle_types):
         return func(particle_types = particle_types, *args, **kwargs)
     return wrapper
 
-def r200_specific_angular_momentum(halo, subhalo, tag, simulation, particle_types = all_particle_types):
+def set_R_200_fraction(func, fraction):
+    def wrapper(*args, **kwargs):
+        return func(R_200_fraction = fraction, *args, **kwargs)
+    return wrapper
+
+def r200_specific_angular_momentum(halo, subhalo, tag, simulation, particle_types = all_particle_types, R_200_fraction = 1.0):
     print("Doing {} {}".format(tag, Simulations.to_string(simulation)))
     galaxy_centre = physical_centeral_mass_positions[simulation][tag]#TODO: check whether cgs or physical code is uncommented!!!
     if galaxy_centre is None:
@@ -66,79 +70,91 @@ def r200_specific_angular_momentum(halo, subhalo, tag, simulation, particle_type
                     )
 
     return specific_angular_momentum_units(np.sqrt((specific_angular_momentum(all_positions, box_all_velocities, box_all_masses)**2).sum()))
-                
-    #all_positions = np.empty(shape = (0, 3))
-    #all_velocities = np.empty(shape = (0, 3))
-    #all_masses = np.empty(shape = (0, ))
-    #for particle_type in particle_IDs_by_type:
-    #    box_particle_IDs, box_particle_locations = snapshot.particle_read(particle_type, "ParticleIDs", unit_system = UnitSystem.cgs, return_coordinates = True)
-    #    id_filter = np.in1d(box_particle_IDs, relivant_particle_IDs)
-    #    if sum(id_filter) == 0:
-    #        continue# No particles with matching IDs present in this particle type
-    #    #selection_radius = max(np.sqrt(((box_particle_locations[id_filter] - galaxy_centre)**2).sum(axis = 1))) + 0.001# Add a little bit to account for selection of smaler radi only
-    #    selection_radius = max(np.sqrt(((box_particle_locations[id_filter] - selection_centre)**2).sum(axis = 1))) + 0.001# Add a little bit to account for selection of smaler radi only
-    #    
-    #    #particle_IDs, particle_locations_box_adjusted = snapshot.particle_read_sphere(particle_type, "ParticleIDs", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs, return_coordinates = True)
-    #    particle_IDs, particle_locations_box_adjusted = snapshot.particle_read_sphere(particle_type, "ParticleIDs", selection_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs, return_coordinates = True)
-    #    id_filter = np.in1d(particle_IDs, relivant_particle_IDs)
-    #    particle_IDs = particle_IDs[id_filter]
-    #    particle_locations_box_adjusted = particle_locations_box_adjusted[id_filter]
-    #    #particle_velocities = snapshot.particle_read_sphere(particle_type, "Velocity", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs)[id_filter]
-    #    particle_velocities = snapshot.particle_read_sphere(particle_type, "Velocity", selection_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs)[id_filter]
-    #    if particle_type != ParticleType.dark_matter:
-    #        #particle_masses = snapshot.particle_read_sphere(particle_type, "Mass", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs)[id_filter]
-    #        particle_masses = snapshot.particle_read_sphere(particle_type, "Mass", selection_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs)[id_filter]
-    #    else:
-    #        particle_masses = np.full(particle_locations_box_adjusted.shape[0], UnitSystem.convert_mass_from_solar(snapshot.header["MassTable"][ParticleType.dark_matter.value] * 10**10 / snapshot.hubble_paramiter))
-        
 
 
-        # Adjust for centre of mass of selected particles
-        #initial_positions = particle_locations_box_adjusted
-        #masses = particle_masses
-        ##com = np.sum(initial_positions * masses[:, None], axis = 0) / sum(masses)
-        #com = centre_of_mass(initial_positions, masses)
-        #radius_adjustment = np.sqrt(np.sum(com**2))
-        #
-        #particle_IDs, particle_locations_box_adjusted = snapshot.particle_read_sphere(particle_type, "ParticleIDs", galaxy_centre + com, selection_radius + radius_adjustment, UnitSystem.cgs, UnitSystem.cgs, return_coordinates = True)
-        #id_filter = np.in1d(particle_IDs, relivant_particle_IDs)
-        #particle_IDs = particle_IDs[id_filter]
-        #particle_locations_box_adjusted = particle_locations_box_adjusted[id_filter]
-        #particle_velocities = snapshot.particle_read_sphere(particle_type, "Velocity", galaxy_centre + com, selection_radius + radius_adjustment, UnitSystem.cgs, UnitSystem.cgs)[id_filter]
-        #if particle_type != ParticleType.dark_matter:
-        #    particle_masses = snapshot.particle_read_sphere(particle_type, "Mass", galaxy_centre + com, selection_radius + radius_adjustment, UnitSystem.cgs, UnitSystem.cgs)[id_filter]
-        #else:
-        #    particle_masses = np.full(particle_locations_box_adjusted.shape[0], UnitSystem.convert_mass_from_solar(snapshot.header["MassTable"][ParticleType.dark_matter.value] * 10**10 / snapshot.hubble_paramiter))
-        
-
-        
-    #    all_positions = np.append(all_positions, particle_locations_box_adjusted, axis = 0)
-    #    all_velocities = np.append(all_velocities, particle_velocities, axis = 0)
-    #    all_masses = np.append(all_masses, particle_masses)
-#
-    #return specific_angular_momentum_units(np.sqrt((specific_angular_momentum(all_positions, all_velocities, all_masses)**2).sum()))
-
-
+"""
+# 1.0 R_200 ----------------------------------------------------------------
 
 # Dark Matter
 produce_simulations_graph(set_particle_types(r200_specific_angular_momentum, ParticleType.dark_matter),
-                          "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", "Specific Angular Momentum of Dark Matter particles within {}$R_{{200}}$ at z=0".format("" if R_200_fraction == 1.0 else "{} ".format(R_200_fraction)),
+                          "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", "Specific Angular Momentum of Dark Matter particles within $R_{200}$ at z=0",
                           x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = False,
-                          ylim_overide = (500, 20000),
-                          extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $\\alpha^{3/2}$"))
+                          xlim_overide = (0.1, 1), ylim_overide = (100, 20000),
+                          extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $\\alpha^{3/2}$", color = line_colours[-1], linestyle = line_styles[-1]))
 
 # Barions (no Black Holes)
-#produce_simulations_graph(set_particle_types(r200_specific_angular_momentum, *barionic_low_mass_particle_types),
-#                          "|$\\vec{j_b}$| ($kPc$ $km$ $s^{-1}$)", "Specific Angular Momentum of Barion Particles within {}$R_{{200}}$ at z=0 (excluding Black Holes)".format("" if R_200_fraction == 1.0 else "{} ".format(R_200_fraction)),
-#                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = False,
-#                          extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $\\alpha^{3/2}$"))
+produce_simulations_graph(set_particle_types(r200_specific_angular_momentum, *barionic_low_mass_particle_types),
+                          "|$\\vec{j_b}$| ($kPc$ $km$ $s^{-1}$)", "Specific Angular Momentum of Barion Particles within $R_{200}$ at z=0 (excluding Black Holes)",
+                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = False,
+                          xlim_overide = (0.1, 1), ylim_overide = (100, 20000),
+                          extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $\\alpha^{3/2}$", color = line_colours[-1], linestyle = line_styles[-1]))
 
 # Dark Matter vs. Barions
-#produce_single_simulation_graphs([set_particle_types(r200_specific_angular_momentum, ParticleType.dark_matter), set_particle_types(r200_specific_angular_momentum, *barionic_low_mass_particle_types)],
-#                                 ["Dark Matter", "Barionic Matter"], y_axis_label = "|$\\vec{j}$| ($kPc$ $km$ $s^{-1}$)", graph_title_partial = "Specific Angular Momentum by Matter Type (particles within {}$R_{{200}}$ at z=0)".format("" if R_200_fraction == 1.0 else "{} ".format(R_200_fraction)),
-#                                 x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = False)
+produce_single_simulation_graphs([set_particle_types(r200_specific_angular_momentum, ParticleType.dark_matter), set_particle_types(r200_specific_angular_momentum, *barionic_low_mass_particle_types)],
+                                 ["Dark Matter", "Barionic Matter"], y_axis_label = "|$\\vec{j}$| ($kPc$ $km$ $s^{-1}$)", graph_title_partial = "Specific Angular Momentum by Matter Type (particles within $R_{200}$ at z=0)",
+                                 x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = False,
+                                 xlim_overide = (0.1, 1), ylim_overide = (100, 20000))
 
 # Barions / Dark Matter
-#produce_simulations_graph(lambda *args, **kwargs: r200_specific_angular_momentum(particle_types = barionic_low_mass_particle_types, *args, **kwargs) / r200_specific_angular_momentum(particle_types = [ParticleType.dark_matter], *args, **kwargs),
-#                          "|$\\vec{j_b}$ / $\\vec{j_b}$| (Arbitrary Units)", "Ratio of Barionic to Dark Matter Specific Angular Momentum for particles within {}$R_{{200}}$ at z=0 (excluding Black Holes)".format("" if R_200_fraction == 1.0 else "{} ".format(R_200_fraction)),
-#                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = False)
+produce_simulations_graph(lambda *args, **kwargs: r200_specific_angular_momentum(particle_types = barionic_low_mass_particle_types, *args, **kwargs) / r200_specific_angular_momentum(particle_types = [ParticleType.dark_matter], *args, **kwargs),
+                          "|$\\vec{j_b}$ / $\\vec{j_DM}$| (Arbitrary Units)", "Ratio of Barionic to Dark Matter Specific Angular Momentum for particles within $R_{200}$ at z=0 (excluding Black Holes)",
+                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = False, invert_x = False, use_rolling_average = False,
+                          xlim_overide = (0.1, 1))
+
+
+
+# 0.1 R_200 ----------------------------------------------------------------
+
+# Dark Matter
+produce_simulations_graph(set_R_200_fraction(set_particle_types(r200_specific_angular_momentum, ParticleType.dark_matter), 0.1),
+                          "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", "Specific Angular Momentum of Dark Matter particles within 0.1 $R_{200}$ at z=0",
+                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = False,
+                          xlim_overide = (0.1, 1), ylim_overide = (100, 20000),
+                          extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $\\alpha^{3/2}$", color = line_colours[-1], linestyle = line_styles[-1]))
+
+# Barions (no Black Holes)
+produce_simulations_graph(set_R_200_fraction(set_particle_types(r200_specific_angular_momentum, *barionic_low_mass_particle_types), 0.1),
+                          "|$\\vec{j_b}$| ($kPc$ $km$ $s^{-1}$)", "Specific Angular Momentum of Barion Particles within 0.1 $R_{200}$ at z=0 (excluding Black Holes)",
+                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = False,
+                          xlim_overide = (0.1, 1), ylim_overide = (100, 20000),
+                          extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $\\alpha^{3/2}$", color = line_colours[-1], linestyle = line_styles[-1]))
+
+# Dark Matter vs. Barions
+produce_single_simulation_graphs([set_R_200_fraction(set_particle_types(r200_specific_angular_momentum, ParticleType.dark_matter), 0.1), set_R_200_fraction(set_particle_types(r200_specific_angular_momentum, *barionic_low_mass_particle_types), 0.1)],
+                                 ["Dark Matter", "Barionic Matter"], y_axis_label = "|$\\vec{j}$| ($kPc$ $km$ $s^{-1}$)", graph_title_partial = "Specific Angular Momentum by Matter Type (particles within 0.1 $R_{200}$ at z=0)",
+                                 x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = False,
+                                 xlim_overide = (0.1, 1), ylim_overide = (100, 20000))
+
+# Barions / Dark Matter
+produce_simulations_graph(lambda *args, **kwargs: r200_specific_angular_momentum(particle_types = barionic_low_mass_particle_types, R_200_fraction = 0.1, *args, **kwargs) / r200_specific_angular_momentum(particle_types = [ParticleType.dark_matter], R_200_fraction = 0.1, *args, **kwargs),
+                          "|$\\vec{j_b}$ / $\\vec{j_DM}$| (Arbitrary Units)", "Ratio of Barionic to Dark Matter Specific Angular Momentum for particles within 0.1 $R_{200}$ at z=0 (excluding Black Holes)",
+                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = False, invert_x = False, use_rolling_average = False,
+                          xlim_overide = (0.1, 1))
+
+
+"""
+# 0.1 R_200 / 1.0 R_200 ----------------------------------------------------
+
+# Dark Matter
+#produce_simulations_graph(lambda *args, **kwargs: r200_specific_angular_momentum(particle_types = [ParticleType.dark_matter], R_200_fraction = 0.1, *args, **kwargs) / r200_specific_angular_momentum(particle_types = [ParticleType.dark_matter], R_200_fraction = 1.0, *args, **kwargs),
+#                          "|$\\vec{j_{DM, 0.1 R_{200}}}$ / $\\vec{j_{DM, R_{200}}}$| (Arbitrary Units)", "Ratio of Dark Matter Specific Angular Momentum for particles within 0.1 $R_{200}$ to within $R_{200}$ at z=0",
+#                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = False, invert_x = False, use_rolling_average = False,
+#                          xlim_overide = (0.1, 1))
+
+# Dark Matter Comparison
+produce_single_simulation_graphs([set_R_200_fraction(set_particle_types(r200_specific_angular_momentum, ParticleType.dark_matter), 1.0), set_R_200_fraction(set_particle_types(r200_specific_angular_momentum, ParticleType.dark_matter), 0.1)],
+                                 ["R = $R_{200}$", "R = 0.1 $R_{200}$"], y_axis_label = "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", graph_title_partial = "Dark Matter Specific Angular Momentum by particles within radius R at z=0",
+                                 x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = False,
+                                 xlim_overide = (0.1, 1), ylim_overide = (100, 20000))
+
+# Barions
+produce_simulations_graph(lambda *args, **kwargs: r200_specific_angular_momentum(particle_types = barionic_low_mass_particle_types, R_200_fraction = 0.1, *args, **kwargs) / r200_specific_angular_momentum(particle_types = barionic_low_mass_particle_types, R_200_fraction = 1.0, *args, **kwargs),
+                          "|$\\vec{j_{b, 0.1 R_{200}}}$ / $\\vec{j_{b, R_{200}}}$| (Arbitrary Units)", "Ratio of Barionic Specific Angular Momentum for particles within 0.1 $R_{200}$ to within $R_{200}$ at z=0",
+                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = False, invert_x = False, use_rolling_average = False,
+                          xlim_overide = (0.1, 1))
+
+# Dark Matter Comparison
+produce_single_simulation_graphs([set_R_200_fraction(set_particle_types(r200_specific_angular_momentum, *barionic_low_mass_particle_types), 1.0), set_R_200_fraction(set_particle_types(r200_specific_angular_momentum, *barionic_low_mass_particle_types), 0.1)],
+                                 ["R = $R_{200}$", "R = 0.1 $R_{200}$"], y_axis_label = "|$\\vec{j_b}$| ($kPc$ $km$ $s^{-1}$)", graph_title_partial = "Barionic Specific Angular Momentum by particles within radius R at z=0",
+                                 x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = False,
+                                 xlim_overide = (0.1, 1), ylim_overide = (100, 20000))
