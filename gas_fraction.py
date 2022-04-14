@@ -29,4 +29,6 @@ def func(halo, subhalo, tag, simulation):
     return (snapshot.header["Omega0"] / snapshot.header["OmegaBaryon"]) * gas_mass / m_200
 
 produce_simulations_graph(func, "$f_{CGM}$ x $\Omega_0$ / $\Omega_b$", "Normalised Gas Mass Fraction",
-                          x_axis = X_Axis_Value.time, log_x = False, invert_x = False)
+                          x_axis = X_Axis_Value.time, log_x = False, invert_x = False,
+                              xlim_overide = (0, constants.times[constants.tags[-1]]),
+                              filename = "f_CGM_R200.png")

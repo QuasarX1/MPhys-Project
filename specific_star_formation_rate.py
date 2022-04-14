@@ -17,4 +17,6 @@ def func(halo, subhalo, tag, simulation):
     return star_formation_rate / stellar_mass
 
 produce_simulations_graph(func, "sSFR ($yr^{-1}$)", "Specific Star Formation Rate",
-                          x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False)
+                          x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False,
+                          xlim_overide = (0, constants.times[constants.tags[-1]]),
+                          filename = "sSFR_30kpc.png")

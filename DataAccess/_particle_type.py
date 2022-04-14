@@ -64,5 +64,5 @@ class ParticleType(Enum):
             raise ValueError("Value of string representation was unexpected.")
 
 all_particle_types = (ParticleType.gas, ParticleType.dark_matter, ParticleType.star, ParticleType.black_hole)
-barionic_particle_types = (ParticleType.gas, ParticleType.star, ParticleType.black_hole)
-barionic_low_mass_particle_types = (ParticleType.gas, ParticleType.star)
+baryonic_particle_types = (ParticleType.gas, ParticleType.star, ParticleType.black_hole)
+baryonic_low_mass_particle_types = (ParticleType.gas, ParticleType.star)

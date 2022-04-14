@@ -45,7 +45,7 @@ class X_Axis_Value(Enum):
 line_colours = ("#CC6677", "#332288", "#117733", "#882255", "#44AA99", "#DDCC77")
 line_styles = ("-", "-.", "--", ":")
 
-def produce_simulations_graph(func, y_axis_label, graph_title_partial, x_axis: X_Axis_Value = X_Axis_Value.redshift, log_x = True, log_y = False, invert_x = True, invert_y = False, xlim_overide = (None, None), ylim_overide = (None, None), use_rolling_average = False, extra_plotting_func = None):
+def produce_simulations_graph(func, y_axis_label, graph_title_partial, x_axis: X_Axis_Value = X_Axis_Value.redshift, log_x = True, log_y = False, invert_x = True, invert_y = False, xlim_overide = (None, None), ylim_overide = (None, None), use_rolling_average = False, extra_plotting_func = None, filename = None):
     quantity_values = []
     redshift_values = []
     time_values = []
@@ -74,6 +74,8 @@ def produce_simulations_graph(func, y_axis_label, graph_title_partial, x_axis: X
         expansion_factor_values[i] = expansion_factor_values[i][array_filter]
 
         
+    plt.figure(figsize = (9, 9))
+
     # Set value for x-axis and label
     x_values = None
     if x_axis == X_Axis_Value.redshift:
@@ -93,6 +95,7 @@ def produce_simulations_graph(func, y_axis_label, graph_title_partial, x_axis: X
             x_values[data_set_index] = x_values[data_set_index][2:]
             quantity_values[data_set_index] = (quantity_values[data_set_index][:-2] + quantity_values[data_set_index][1:-1] + quantity_values[data_set_index][2:]) / 3
 
+    
     plt.plot(x_values[0], quantity_values[0], label = "Early", color = line_colours[0], linestyle = line_styles[1])
     plt.plot(x_values[1], quantity_values[1], label = "Organic", color = line_colours[1])
     plt.plot(x_values[2], quantity_values[2], label = "Late", color = line_colours[2], linestyle = line_styles[2])
@@ -127,10 +130,15 @@ def produce_simulations_graph(func, y_axis_label, graph_title_partial, x_axis: X
     plt.ylabel(y_axis_label)
     plt.title(f"{graph_title_partial} over Time")
     plt.legend()
-    plt.show()
+    if filename is not None:
+        plt.savefig(filename)
+        plt.clf()
+        plt.close()
+    else:
+        plt.show()
 
-def produce_single_simulation_graphs(funcs, quantity_labels, y_axis_label, graph_title_partial, x_axis: X_Axis_Value = X_Axis_Value.redshift, log_x = True, log_y = False, invert_x = True, invert_y = False, xlim_overide = (None, None), ylim_overide = (None, None), use_rolling_average = False):
-    fig, axes = plt.subplots(1, 3)
+def produce_single_simulation_graphs(funcs, quantity_labels, y_axis_label, graph_title_partial, x_axis: X_Axis_Value = X_Axis_Value.redshift, log_x = True, log_y = False, invert_x = True, invert_y = False, xlim_overide = (None, None), ylim_overide = (None, None), use_rolling_average = False, filename = None):
+    fig, axes = plt.subplots(1, 3, figsize = (20, 5))
 
     for simulation_number, simulation in enumerate((Simulations.Early, Simulations.Organic, Simulations.Late)):
         quantity_values = []
@@ -227,31 +235,48 @@ def produce_single_simulation_graphs(funcs, quantity_labels, y_axis_label, graph
     for simulation_number in range(len((Simulations.Early, Simulations.Organic, Simulations.Late))):
         axes[simulation_number].set_ylim(min_y_limit, max_y_limit)
     plt.suptitle(f"{graph_title_partial} over Time")
-    plt.show()
+    if filename is not None:
+        plt.savefig(filename)
+        plt.clf()
+        plt.close()
+    else:
+        plt.show()
 
 
 
 if __name__ == "__main__":
-    ## M_200 (r = R_200)
-    #produce_simulations_graph(total_mass_M200, y_axis_label = "$M_{200}$ ($M_{sun}$)", graph_title_partial = "Group_M_Crit200",
-    #                          x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False, ylim_overide = (10**10, None))
-    #
-    ## M* (r = 30KPc)
-    #produce_simulations_graph(stellar_mass, y_axis_label = "$M_*$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Stellar Mass",
-    #                          x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False, ylim_overide = (10**6, None))
-    #
-    ## M_BH (r = 30KPc)
-    #produce_simulations_graph(black_hole_mass, y_axis_label = "$M_{BH}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Black Hole Mass",
-    #                          x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False, ylim_overide = (10**5, None))
-    #
-    ## M_DM (r = 30KPc)
-    #produce_simulations_graph(dark_matter_mass, y_axis_label = "$M_{DM}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Dark Matter Mass",
-    #                          x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False)
-    #
-    ## Barionic Mass (r = 30KPc)
-    #produce_simulations_graph(baryon_mass, y_axis_label = "$M_{Baryonic}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Baryonic Mass",
-    #                          x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False)
+    # M_200 (r = R_200)
+    produce_simulations_graph(total_mass_M200, y_axis_label = "$M_{200}$ ($M_{sun}$)", graph_title_partial = "Group_M_Crit200",
+                              x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False,
+                              xlim_overide = (0, constants.times[constants.tags[-1]]), ylim_overide = (10**10, None),
+                              filename = "M200_over_time.png")
+    
+    # M* (r = 30KPc)
+    produce_simulations_graph(stellar_mass, y_axis_label = "$M_*$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Stellar Mass",
+                              x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False,
+                              xlim_overide = (0, constants.times[constants.tags[-1]]), ylim_overide = (10**6, None),
+                              filename = "M_star_30kpc_over_time.png")
+    
+    # M_BH (r = 30KPc)
+    produce_simulations_graph(black_hole_mass, y_axis_label = "$M_{BH}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Black Hole Mass",
+                              x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False,
+                              xlim_overide = (0, constants.times[constants.tags[-1]]), ylim_overide = (10**5, None),
+                              filename = "M_BH_30kpc_over_time.png")
+    
+    # M_DM (r = 30KPc)
+    produce_simulations_graph(dark_matter_mass, y_axis_label = "$M_{DM}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Dark Matter Mass",
+                              x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False,
+                              xlim_overide = (0, constants.times[constants.tags[-1]]),
+                              filename = "M_DM_30kpc_over_time.png")
+    
+    # Baryonic Mass (r = 30KPc)
+    produce_simulations_graph(baryon_mass, y_axis_label = "$M_{Baryonic}$ ($M_{sun}$)", graph_title_partial = "Central Subhalo Baryonic Mass",
+                              x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False,
+                              xlim_overide = (0, constants.times[constants.tags[-1]]),
+                              filename = "M_baryon_30kpc_over_time.png")
     
     # Mass Brakedown (r = 30KPc)
     produce_single_simulation_graphs([dark_matter_mass, gas_mass, stellar_mass, black_hole_mass], ["Dark Matter", "Gas", "Stars", "Black Holes"], y_axis_label = "Mass ($M_{sun}$)", graph_title_partial = "Central Subhalo Mass Brakedown (r = 30 kPc)",
-                                     x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False)
+                                     x_axis = X_Axis_Value.time, log_x = False, log_y = True, invert_x = False,
+                                     xlim_overide = (0, constants.times[constants.tags[-1]]),
+                                     filename = "30kpc_mass_brakedown_over_time.png")

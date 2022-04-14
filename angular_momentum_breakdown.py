@@ -22,7 +22,7 @@ def set_selection_radius(func, r200 = False):
             return func(use_r200 = True, *args, **kwargs)
     return wrapper
 
-def barionic_angular_momenta_data(halo, subhalo, tag, simulation, use_r200 = False):
+def baryonic_angular_momenta_data(halo, subhalo, tag, simulation, use_r200 = False):
     galaxy_centre = physical_centeral_mass_positions[simulation][tag]#TODO: check whether cgs or physical code is uncommented!!!
     if galaxy_centre is None:
         raise LookupError("No data avalible.")
@@ -50,7 +50,7 @@ def barionic_angular_momenta_data(halo, subhalo, tag, simulation, use_r200 = Fal
     return angular_momenta, net_angular_momentum
 
 
-def barionic_specific_angular_momenta_data(halo, subhalo, tag, simulation, use_r200 = False):
+def baryonic_specific_angular_momenta_data(halo, subhalo, tag, simulation, use_r200 = False):
     galaxy_centre = physical_centeral_mass_positions[simulation][tag]#TODO: check whether cgs or physical code is uncommented!!!
     if galaxy_centre is None:
         raise LookupError("No data avalible.")
@@ -79,7 +79,7 @@ def barionic_specific_angular_momenta_data(halo, subhalo, tag, simulation, use_r
 
 
 def angular_momentum_fraction(target_particle_type, halo, subhalo, tag, simulation):
-    angular_momenta, net_angular_momentum = barionic_angular_momenta_data(halo, subhalo, tag, simulation)
+    angular_momenta, net_angular_momentum = baryonic_angular_momenta_data(halo, subhalo, tag, simulation)
         
     total_angular_momentum_length = np.linalg.norm(net_angular_momentum, 2)
 
@@ -95,7 +95,7 @@ def angular_momentum_fraction(target_particle_type, halo, subhalo, tag, simulati
 
 
 def specific_angular_momentum_fraction(target_particle_type, halo, subhalo, tag, simulation):
-    specific_angular_momenta, net_specific_angular_momentum = barionic_specific_angular_momenta_data(halo, subhalo, tag, simulation)
+    specific_angular_momenta, net_specific_angular_momentum = baryonic_specific_angular_momenta_data(halo, subhalo, tag, simulation)
         
     total_specific_angular_momentum_length = np.linalg.norm(net_specific_angular_momentum, 2)
 
@@ -111,7 +111,7 @@ def specific_angular_momentum_fraction(target_particle_type, halo, subhalo, tag,
 
 
 def gas_star_angular_momentum_angle(halo, subhalo, tag, simulation):
-    angular_momenta, _ = barionic_angular_momenta_data(halo, subhalo, tag, simulation)
+    angular_momenta, _ = baryonic_angular_momenta_data(halo, subhalo, tag, simulation)
 
     return np.arccos(angular_momenta[ParticleType.gas].dot(angular_momenta[ParticleType.star]) / (np.linalg.norm(angular_momenta[ParticleType.gas], 2) * np.linalg.norm(angular_momenta[ParticleType.star], 2))) * 180 / np.pi
 
@@ -176,11 +176,11 @@ def DM_30kpc_specific_angular_momentum(halo, subhalo, tag, simulation):
 
 
 def particle_specific_angular_momentum(target_particle_type, halo, subhalo, tag, simulation, use_r200 = False):
-    return specific_angular_momentum_units(np.linalg.norm(barionic_specific_angular_momenta_data(halo, subhalo, tag, simulation, use_r200)[0][target_particle_type]))
+    return specific_angular_momentum_units(np.linalg.norm(baryonic_specific_angular_momenta_data(halo, subhalo, tag, simulation, use_r200)[0][target_particle_type]))
 
 
-def barionic_specific_angular_momentum(halo, subhalo, tag, simulation, use_r200 = False):
-    return specific_angular_momentum_units(np.linalg.norm(barionic_specific_angular_momenta_data(halo, subhalo, tag, simulation, use_r200)[1]))
+def baryonic_specific_angular_momentum(halo, subhalo, tag, simulation, use_r200 = False):
+    return specific_angular_momentum_units(np.linalg.norm(baryonic_specific_angular_momenta_data(halo, subhalo, tag, simulation, use_r200)[1]))
 
 
 
@@ -232,18 +232,18 @@ produce_simulations_graph(DM_halo_specific_angular_momentum, "|$\\vec{j_{DM}}$| 
 #produce_simulations_graph(DM_30kpc_specific_angular_momentum, "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", "Dark Matter (30 kPc) Specific Angular Momentum",
 #                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = True, extra_plotting_func = alpha_exp_line)
 
-#produce_simulations_graph(set_selection_radius(barionic_specific_angular_momentum, r200 = True), "|$\\vec{j_{b}}$| ($kPc$ $km$ $s^{-1}$)", "Barion ($R_{200}$) Specific Angular Momentum",
+#produce_simulations_graph(set_selection_radius(baryonic_specific_angular_momentum, r200 = True), "|$\\vec{j_{b}}$| ($kPc$ $km$ $s^{-1}$)", "Baryon ($R_{200}$) Specific Angular Momentum",
 #                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = True, extra_plotting_func = alpha_exp_line)
-#produce_simulations_graph(set_selection_radius(barionic_specific_angular_momentum, r200 = False), "|$\\vec{j_{b}}$| ($kPc$ $km$ $s^{-1}$)", "Barion (30 kPc) Specific Angular Momentum",
+#produce_simulations_graph(set_selection_radius(baryonic_specific_angular_momentum, r200 = False), "|$\\vec{j_{b}}$| ($kPc$ $km$ $s^{-1}$)", "Baryon (30 kPc) Specific Angular Momentum",
 #                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = True, extra_plotting_func = alpha_exp_line)
 
-#produce_single_simulation_graphs([DM_halo_specific_angular_momentum, set_selection_radius(barionic_specific_angular_momentum, r200 = True)], ["Dark Matter", "Barions"], y_axis_label = "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", graph_title_partial = "Specific Angular Momentum ($R_{200}$)",
+#produce_single_simulation_graphs([DM_halo_specific_angular_momentum, set_selection_radius(baryonic_specific_angular_momentum, r200 = True)], ["Dark Matter", "Baryons"], y_axis_label = "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", graph_title_partial = "Specific Angular Momentum ($R_{200}$)",
 #                                     x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = True)
-#produce_single_simulation_graphs([DM_30kpc_specific_angular_momentum, set_selection_radius(barionic_specific_angular_momentum, r200 = False)], ["Dark Matter", "Barions"], y_axis_label = "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", graph_title_partial = "Specific Angular Momentum (30 kPc)",
+#produce_single_simulation_graphs([DM_30kpc_specific_angular_momentum, set_selection_radius(baryonic_specific_angular_momentum, r200 = False)], ["Dark Matter", "Baryons"], y_axis_label = "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", graph_title_partial = "Specific Angular Momentum (30 kPc)",
 #                                     x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = True)
 
 produce_single_simulation_graphs([DM_halo_specific_angular_momentum, DM_30kpc_specific_angular_momentum], ["$R_{200}$", "30 kPc"], y_axis_label = "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", graph_title_partial = "Dark Matter Specific Angular Momentum",
                                      x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = True)
-produce_single_simulation_graphs([set_selection_radius(barionic_specific_angular_momentum, r200 = False), set_selection_radius(barionic_specific_angular_momentum, r200 = True)], ["$R_{200}$", "30 kPc"], y_axis_label = "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", graph_title_partial = "Barionic Specific Angular Momentum",
+produce_single_simulation_graphs([set_selection_radius(baryonic_specific_angular_momentum, r200 = False), set_selection_radius(baryonic_specific_angular_momentum, r200 = True)], ["$R_{200}$", "30 kPc"], y_axis_label = "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", graph_title_partial = "Baryonic Specific Angular Momentum",
                                      x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = True)
 

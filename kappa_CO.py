@@ -59,6 +59,9 @@ def func(halo, subhalo, tag, simulation):
 
 if __name__ == "__main__":
     produce_simulations_graph(func, "$\kappa_{CO}$", "Co-Rotating Stellar Kinetic Energy Fraction",
-                              x_axis = X_Axis_Value.time, log_x = False, invert_x = False)
-#                              x_axis = X_Axis_Value.redshift, log_x = True, invert_x = True)
+                              x_axis = X_Axis_Value.time, log_x = False, invert_x = False,
+#                             x_axis = X_Axis_Value.redshift, log_x = True, invert_x = True,
+                              xlim_overide = (0, constants.times[constants.tags[-1]]),
+                              filename = "kappa_CO_30kpc.png")
+
 

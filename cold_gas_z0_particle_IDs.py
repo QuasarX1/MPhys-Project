@@ -16,9 +16,13 @@ def find_particle_IDs(sim: Simulations, r_200_fraction: float = 1.0):
     
     snapshot = ParticleReadConversion_EagleSnapshot(tag, sim, SimulationModels.RECAL, relitive_data_root)
     for particle_type in all_particle_types:
-        particle_IDs_by_type[particle_type] = snapshot.particle_read_sphere(particle_type, "ParticleIDs", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs)
+        particles = snapshot.particle_read_sphere(particle_type, "ParticleIDs", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs)
+        if particle_type == ParticleType.gas:
+            formation_rates = snapshot.particle_read_sphere(particle_type, "StarFormationRate", galaxy_centre, selection_radius, UnitSystem.cgs, UnitSystem.cgs)
+            particles = particles[formation_rates == 0]# Cold gas is not star forming
+        particle_IDs_by_type[particle_type] = particles
         
-    with open("{}_final_R_200_times_{}_particle_IDs.txt".format(Simulations.to_string(sim), r_200_fraction), "w") as f:
+    with open("{}_final_R_200_times_{}_particle_IDs_cold_gas_only.txt".format(Simulations.to_string(sim), r_200_fraction), "w") as f:
         for particle_type in all_particle_types:
             f.write("--|| PARTICLE TYPE ||--:{}\n".format(ParticleType.to_string(particle_type)))
             for value in particle_IDs_by_type[particle_type]:
@@ -27,7 +31,7 @@ def find_particle_IDs(sim: Simulations, r_200_fraction: float = 1.0):
     
 
 def check_exists_patricle_IDs(sim: Simulations, r_200_fraction: float = 1.0):
-    return os.path.exists("{}_final_R_200_times_{}_particle_IDs.txt".format(Simulations.to_string(sim), r_200_fraction))
+    return os.path.exists("{}_final_R_200_times_{}_particle_IDs_cold_gas_only.txt".format(Simulations.to_string(sim), r_200_fraction))
 
 
 
@@ -37,7 +41,7 @@ def load_particle_IDs(sim: Simulations, r_200_fraction: float = 1.0):
         
     particle_IDs_by_type = {}
 
-    with open("{}_final_R_200_times_{}_particle_IDs.txt".format(Simulations.to_string(sim), r_200_fraction), "r") as f:
+    with open("{}_final_R_200_times_{}_particle_IDs_cold_gas_only.txt".format(Simulations.to_string(sim), r_200_fraction), "r") as f:
         lines = f.readlines()
         current_particle_type = None
         for line in lines:
@@ -51,19 +55,7 @@ def load_particle_IDs(sim: Simulations, r_200_fraction: float = 1.0):
 
     return particle_IDs_by_type
 
-particle_IDs_by_type = load_particle_IDs(Simulations.Early, 1.0)
-#print("Early:")
-#print("N Gas Particles: " + str(len(particle_IDs_by_type[ParticleType.gas])))
-#print("N Star Particles: " + str(len(particle_IDs_by_type[ParticleType.star])))
-#particle_IDs_by_type = load_particle_IDs(Simulations.Organic, 1.0)
-#print("Organic:")
-#print("N Gas Particles: " + str(len(particle_IDs_by_type[ParticleType.gas])))
-#print("N Star Particles: " + str(len(particle_IDs_by_type[ParticleType.star])))
-#particle_IDs_by_type = load_particle_IDs(Simulations.Late, 1.0)
-#print("Late:")
-#print("N Gas Particles: " + str(len(particle_IDs_by_type[ParticleType.gas])))
-#print("N Star Particles: " + str(len(particle_IDs_by_type[ParticleType.star])))
-#exit()
+
 
 if __name__ == "__main__":
     if not check_exists_patricle_IDs(Simulations.Early, 1.0):
