@@ -245,7 +245,7 @@ if __name__ == "__main__":
     #    "|$\\vec{j}$| ($kPc$ $km$ $s^{-1}$)", "Specific Angular Momentum of Gas Particles that have passed through the ISM and Experienced Feedback",
     #    x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = False,
     #    xlim_overide = (0.1, 1), ylim_overide = (100, 20000),
-    #    #extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $\\alpha^{3/2}$", color = line_colours[-1], linestyle = line_styles[-1]),
+    #    #extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $a^{3/2}$", color = line_colours[-1], linestyle = line_styles[-1]),
     #    filename = "j_feedback_ISM_gas.png")
     #print("--|| INF0 ||-- Done")
 
@@ -255,7 +255,7 @@ if __name__ == "__main__":
     #    "|$\\vec{j}$| ($kPc$ $km$ $s^{-1}$)", "Specific Angular Momentum of Gas Particles that have passed through the ISM and Experienced Feedback (R = 3.0 * R_200)",
     #    x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = False,
     #    xlim_overide = (0.1, 1), ylim_overide = (100, 20000),
-    #    #extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $\\alpha^{3/2}$", color = line_colours[-1], linestyle = line_styles[-1]),
+    #    #extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $a^{3/2}$", color = line_colours[-1], linestyle = line_styles[-1]),
     #    filename = "j_feedback_ISM_gas_3.0_times_R_200.png")
     #print("--|| INF0 ||-- Done")
 

@@ -46,57 +46,57 @@ if __name__ == "__main__":
 
 
 
-    #for particle_type in (ParticleType.gas, ParticleType.star, ParticleType.dark_matter):
-    #    for r_200_fraction in (1.0, 0.1):
-    #        for sim in (Simulations.Early, Simulations.Organic, Simulations.Late):
-    #            for tag in constants.tags:
-    #                halo = assembily_history[sim][tag]["halo"]
-    #                subhalo = assembily_history[sim][tag]["subhalo"]
-    #                if halo is None:
-    #                    continue
-    #                try:
-    #                    r = sphere_radius(halo, subhalo, tag, sim, [particle_type], r_200_fraction)
-    #                except LookupError:
-    #                    continue
-    #                r_values_tags[particle_type][r_200_fraction][sim].append(tag)
-    #                r_values[particle_type][r_200_fraction][sim].append(r)
+    for particle_type in (ParticleType.gas, ParticleType.star, ParticleType.dark_matter):
+        for r_200_fraction in (1.0, 0.1):
+            for sim in (Simulations.Early, Simulations.Organic, Simulations.Late):
+                for tag in constants.tags:
+                    halo = assembily_history[sim][tag]["halo"]
+                    subhalo = assembily_history[sim][tag]["subhalo"]
+                    if halo is None:
+                        continue
+                    try:
+                        r = sphere_radius(halo, subhalo, tag, sim, [particle_type], r_200_fraction)
+                    except LookupError:
+                        continue
+                    r_values_tags[particle_type][r_200_fraction][sim].append(tag)
+                    r_values[particle_type][r_200_fraction][sim].append(r)
 
-    #with open("r_values.txt", "w") as f:
-    #    for sim in (Simulations.Early, Simulations.Organic, Simulations.Late):
-    #        f.write("--|| STYPE ||-- {}\n".format(Simulations.to_string(sim)))
-    #        for r_200_fraction in (1.0, 0.1):
-    #            f.write(f"--|| RATIO ||-- {r_200_fraction}\n")
-    #            for particle_type in (ParticleType.gas, ParticleType.star, ParticleType.dark_matter):
-    #                f.write("--|| PTYPE ||-- {}\n".format(ParticleType.to_string(particle_type)))
-    #                for i in range(len(r_values_tags[particle_type][r_200_fraction][sim])):
-    #                    f.write(f"{r_values_tags[particle_type][r_200_fraction][sim][i]}:{r_values[particle_type][r_200_fraction][sim][i]}\n")
+    with open("r_values.txt", "w") as f:
+        for sim in (Simulations.Early, Simulations.Organic, Simulations.Late):
+            f.write("--|| STYPE ||-- {}\n".format(Simulations.to_string(sim)))
+            for r_200_fraction in (1.0, 0.1):
+                f.write(f"--|| RATIO ||-- {r_200_fraction}\n")
+                for particle_type in (ParticleType.gas, ParticleType.star, ParticleType.dark_matter):
+                    f.write("--|| PTYPE ||-- {}\n".format(ParticleType.to_string(particle_type)))
+                    for i in range(len(r_values_tags[particle_type][r_200_fraction][sim])):
+                        f.write(f"{r_values_tags[particle_type][r_200_fraction][sim][i]}:{r_values[particle_type][r_200_fraction][sim][i]}\n")
 
 
 
-    #for particle_type in (ParticleType.gas, ParticleType.star, ParticleType.dark_matter):
-    #    for r_200_fraction in (1.0, 0.1):
-    #        for sim in (Simulations.Early, Simulations.Organic, Simulations.Late):
-    #            for tag in constants.tags:
-    #                halo = assembily_history[sim][tag]["halo"]
-    #                subhalo = assembily_history[sim][tag]["subhalo"]
-    #                if halo is None:
-    #                    continue
-    #                try:
-    #                    j = sphere_specific_angular_momentum(halo, subhalo, tag, sim, [particle_type], r_200_fraction)
-    #                except LookupError:
-    #                    continue
-    #                j_values_tags[particle_type][r_200_fraction][sim].append(tag)
-    #                j_values[particle_type][r_200_fraction][sim].append(j)
+    for particle_type in (ParticleType.gas, ParticleType.star, ParticleType.dark_matter):
+        for r_200_fraction in (1.0, 0.1):
+            for sim in (Simulations.Early, Simulations.Organic, Simulations.Late):
+                for tag in constants.tags:
+                    halo = assembily_history[sim][tag]["halo"]
+                    subhalo = assembily_history[sim][tag]["subhalo"]
+                    if halo is None:
+                        continue
+                    try:
+                        j = sphere_specific_angular_momentum(halo, subhalo, tag, sim, [particle_type], r_200_fraction)
+                    except LookupError:
+                        continue
+                    j_values_tags[particle_type][r_200_fraction][sim].append(tag)
+                    j_values[particle_type][r_200_fraction][sim].append(j)
 
-    #with open("j_values.txt", "w") as f:
-    #    for sim in (Simulations.Early, Simulations.Organic, Simulations.Late):
-    #        f.write("--|| STYPE ||-- {}\n".format(Simulations.to_string(sim)))
-    #        for r_200_fraction in (1.0, 0.1):
-    #            f.write(f"--|| RATIO ||-- {r_200_fraction}\n")
-    #            for particle_type in (ParticleType.gas, ParticleType.star, ParticleType.dark_matter):
-    #                f.write("--|| PTYPE ||-- {}\n".format(ParticleType.to_string(particle_type)))
-    #                for i in range(len(j_values_tags[particle_type][r_200_fraction][sim])):
-    #                    f.write(f"{j_values_tags[particle_type][r_200_fraction][sim][i]}:{j_values[particle_type][r_200_fraction][sim][i]}\n")
+    with open("j_values.txt", "w") as f:
+        for sim in (Simulations.Early, Simulations.Organic, Simulations.Late):
+            f.write("--|| STYPE ||-- {}\n".format(Simulations.to_string(sim)))
+            for r_200_fraction in (1.0, 0.1):
+                f.write(f"--|| RATIO ||-- {r_200_fraction}\n")
+                for particle_type in (ParticleType.gas, ParticleType.star, ParticleType.dark_matter):
+                    f.write("--|| PTYPE ||-- {}\n".format(ParticleType.to_string(particle_type)))
+                    for i in range(len(j_values_tags[particle_type][r_200_fraction][sim])):
+                        f.write(f"{j_values_tags[particle_type][r_200_fraction][sim][i]}:{j_values[particle_type][r_200_fraction][sim][i]}\n")
                     
 
 

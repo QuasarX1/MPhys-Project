@@ -15,7 +15,7 @@ def func(halo, subhalo, tag, simulation):
         raise LookupError("No data avalible.")
 
     #r_200 = load_catalouge_field("Group_R_Crit200", "FOF", tag, simulation, SimulationModels.RECAL, relitive_data_root, UnitSystem.cgs)[assembily_history[simulation][tag]["halo"] - 1]
-    #selection_radius = r_200
+    #selection_radius = r_200 * 0.1
     selection_radius = 9.257*(10**22)# 30 KPc
 
     snapshot = ParticleReadConversion_EagleSnapshot(tag, simulation, SimulationModels.RECAL, relitive_data_root)

@@ -1,9 +1,9 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-from DataAccess import ParticleReadConversion_EagleSnapshot, Simulations, SimulationModels, ParticleType, UnitSystem, constants
+from DataAccess import ParticleReadConversion_EagleSnapshot, Simulations, SimulationModels, ParticleType, UnitSystem, constants, load_catalouge_field
 
-from assembily_history import physical_centeral_mass_positions
+from assembily_history import physical_centeral_mass_positions, assembily_history
 
 sim = Simulations.Organic
 model = SimulationModels.RECAL

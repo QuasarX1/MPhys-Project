@@ -139,7 +139,7 @@ if __name__ == "__main__":
     #                          "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", "Specific Angular Momentum of Dark Matter particles within $R_{200}$ at z=0",
     #                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = False,
     #                          xlim_overide = (0.1, 1), ylim_overide = (100, 20000),
-    #                          extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $\\alpha^{3/2}$", color = line_colours[-1], linestyle = line_styles[-1]),
+    #                          extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $a^{3/2}$", color = line_colours[-1], linestyle = line_styles[-1]),
     #                          filename = "j_DM_R200.png")
     #print("Dark Matter - r")
     #produce_simulations_graph(set_particle_types(sphere_radius, ParticleType.dark_matter),
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     #                          "|$\\vec{j_b}$| ($kPc$ $km$ $s^{-1}$)", "Specific Angular Momentum of Baryon Particles within $R_{200}$ at z=0 (excluding Black Holes)",
     #                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = False,
     #                          xlim_overide = (0.1, 1), ylim_overide = (100, 20000),
-    #                          extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $\\alpha^{3/2}$", color = line_colours[-1], linestyle = line_styles[-1]),
+    #                          extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $a^{3/2}$", color = line_colours[-1], linestyle = line_styles[-1]),
     #                          filename = "j_baryon_R200.png")
     #print("Gas - r")
     #produce_simulations_graph(set_particle_types(sphere_radius, ParticleType.gas),
@@ -211,7 +211,7 @@ if __name__ == "__main__":
     #                          "|$\\vec{j_{DM}}$| ($kPc$ $km$ $s^{-1}$)", "Specific Angular Momentum of Dark Matter particles within 0.1 $R_{200}$ at z=0",
     #                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = False,
     #                          xlim_overide = (0.1, 1), ylim_overide = (100, 20000),
-    #                          extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $\\alpha^{3/2}$", color = line_colours[-1], linestyle = line_styles[-1]),
+    #                          extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $a^{3/2}$", color = line_colours[-1], linestyle = line_styles[-1]),
     #                          filename = "j_DM_0.1_R200.png")
     #print("Dark Matter - r - 0.1 R_200")
     #produce_simulations_graph(set_R_200_fraction(set_particle_types(sphere_radius, ParticleType.dark_matter), 0.1),
@@ -226,7 +226,7 @@ if __name__ == "__main__":
     #                          "|$\\vec{j_b}$| ($kPc$ $km$ $s^{-1}$)", "Specific Angular Momentum of Baryon Particles within 0.1 $R_{200}$ at z=0 (excluding Black Holes)",
     #                          x_axis = X_Axis_Value.expansion_factor, log_x = True, log_y = True, invert_x = False, use_rolling_average = False,
     #                          xlim_overide = (0.1, 1), ylim_overide = (100, 20000),
-    #                          extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $\\alpha^{3/2}$", color = line_colours[-1], linestyle = line_styles[-1]),
+    #                          extra_plotting_func = lambda x_values, *args, **kwargs: plt.plot(x_values[1][:5], kwargs["expansion_factor_values"][1][:5]**(3/2) * 10**5, label = "j $\\propto$ $a^{3/2}$", color = line_colours[-1], linestyle = line_styles[-1]),
     #                          filename = "j_baryon_0.1_R200.png")
     #print("Gas - r - 0.1 R_200")
     #produce_simulations_graph(set_R_200_fraction(set_particle_types(sphere_radius, ParticleType.gas), 0.1),
